@@ -35,7 +35,6 @@ import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -49,6 +48,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -129,7 +129,7 @@ public class ScreenshotUtil {
         driver.get(url);
         scheduleLogger.info("Cronjob({}) do screenshot url={}, timeout={} start", jobId, url, timeOutSecond);
         try {
-            WebDriverWait wait = new WebDriverWait(driver, timeOutSecond);
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeOutSecond));
             ExpectedCondition<WebElement> ConditionOfSign = ExpectedConditions.presenceOfElementLocated(By.id("headlessBrowserRenderSign"));
             ExpectedCondition<WebElement> ConditionOfWidth = ExpectedConditions.presenceOfElementLocated(By.id("width"));
             ExpectedCondition<WebElement> ConditionOfHeight = ExpectedConditions.presenceOfElementLocated(By.id("height"));
@@ -201,7 +201,7 @@ public class ScreenshotUtil {
                 throw new IllegalArgumentException("Unknown Web browser:" + DEFAULT_BROWSER);
         }
 
-        driver.manage().timeouts().implicitlyWait(3, TimeUnit.MINUTES);
+        driver.manage().timeouts().implicitlyWait(Duration.ofMinutes(3));
         driver.manage().window().maximize();
         driver.manage().window().setSize(new Dimension(imageWidth != null && imageWidth > 0 ? imageWidth : DEFAULT_SCREENSHOT_WIDTH, DEFAULT_SCREENSHOT_HEIGHT));
         
@@ -213,7 +213,7 @@ public class ScreenshotUtil {
         if (!StringUtils.isEmpty(REMOTE_WEBDRIVER_URL)) {
             scheduleLogger.info("User remoteWebDriver:{}", REMOTE_WEBDRIVER_URL);
             try {
-                return new RemoteWebDriver(new URL(REMOTE_WEBDRIVER_URL), DesiredCapabilities.chrome());
+                return new RemoteWebDriver(new URL(REMOTE_WEBDRIVER_URL), buildChromeOptions());
             } catch (MalformedURLException ex) {
                 scheduleLogger.error(ex.toString(), ex);
             }
@@ -226,8 +226,11 @@ public class ScreenshotUtil {
         }
 
         System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, CHROME_DRIVER_PATH);
-        ChromeOptions options = new ChromeOptions();
+        return new ChromeDriver(buildChromeOptions());
+    }
 
+    private ChromeOptions buildChromeOptions() {
+        ChromeOptions options = new ChromeOptions();
         options.addArguments("headless");
         options.addArguments("no-sandbox");
         options.addArguments("disable-gpu");
@@ -238,8 +241,7 @@ public class ScreenshotUtil {
         options.addArguments("disable-web-security");
         options.addArguments("no-proxy-server");
         options.addArguments("disable-dev-shm-usage");
-
-        return new ChromeDriver(options);
+        return options;
     }
 
     private WebDriver generatePhantomJsDriver() throws ExecutionException {
