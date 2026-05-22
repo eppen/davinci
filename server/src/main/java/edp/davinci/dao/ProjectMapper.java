@@ -32,6 +32,10 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/ProjectMapper.xml
+ * XML statements: insert, deleteBeforeOrgRole, getProjectsByKeywordsWithUser, getProjectsByOrgWithUser, getProjectsByUser, getFavoriteProjects, getProjectIdsByAdmin, getProjectDetail.
+ */
 @Component
 public interface ProjectMapper {
 
@@ -43,38 +47,62 @@ public interface ProjectMapper {
 
     List<ProjectWithCreateBy> getProjectsByKeywordsWithUser(@Param("keywords") String keywords, @Param("userId") Long userId, @Param("orgList") List<OrganizationInfo> list);
 
-    @Select({"select id from project where org_id = #{orgId} and `name` = #{name}"})
+    @Select(value = {"select id from project where org_id = #{orgId} and `name` = #{name}"}, databaseId = "mysql")
+
+    @Select(value = {"select id from project where org_id = #{orgId} and [name] = #{name}"}, databaseId = "sqlserver")
+
     Long getByNameWithOrgId(@Param("name") String name, @Param("orgId") Long orgId);
 
     int insert(Project project);
 
     @Select({"select * from project where id = #{id}"})
+
+
     Project getById(@Param("id") Long id);
 
     ProjectDetail getProjectDetail(@Param("id") Long id);
 
     @Select({"select * from project where id = #{id} and user_id = #{userId}"})
+
+
     Project getByProject(Project project);
 
-    @Update({"update project set `name` = #{name}, description = #{description}, visibility = #{visibility}, update_time = #{updateTime}, update_by = #{updateBy}  where id = #{id}"})
+    @Update(value = {"update project set `name` = #{name}, description = #{description}, visibility = #{visibility}, update_time = #{updateTime}, update_by = #{updateBy}  where id = #{id}"}, databaseId = "mysql")
+
+    @Update(value = {"update project set [name] = #{name}, description = #{description}, visibility = #{visibility}, update_time = #{updateTime}, update_by = #{updateBy}  where id = #{id}"}, databaseId = "sqlserver")
+
     int updateBaseInfo(Project project);
 
-    @Update({"update project set `org_id` = #{orgId} where id = #{id}"})
+    @Update(value = {"update project set `org_id` = #{orgId} where id = #{id}"}, databaseId = "mysql")
+
+    @Update(value = {"update project set [org_id] = #{orgId} where id = #{id}"}, databaseId = "sqlserver")
+
     int changeOrganization(Project project);
 
-    @Update({"update project set `is_transfer` = #{isTransfer, jdbcType=TINYINT} where id = #{id}"})
+    @Update(value = {"update project set `is_transfer` = #{isTransfer, jdbcType=TINYINT} where id = #{id}"}, databaseId = "mysql")
+
+    @Update(value = {"update project set [is_transfer] = #{isTransfer, jdbcType=TINYINT} where id = #{id}"}, databaseId = "sqlserver")
+
     int changeTransferStatus(@Param("isTransfer") Boolean isTransfer, @Param("id") Long id);
 
     @Delete({"delete from project where id = #{id}"})
+
+
     int deleteById(@Param("id") Long id);
 
     @Select({"select * from project where org_id = #{orgId}"})
+
+
     List<Project> getByOrgId(@Param("orgId") Long orgId);
 
     @Update({"update project set star_num = star_num + 1 where id = #{id}"})
+
+
     int starNumAdd(@Param("id") Long id);
 
     @Update({"update project set star_num = IF(star_num > 0,star_num - 1, 0) where id = #{id}"})
+
+
     int starNumReduce(@Param("id") Long id);
 
     Set<Long> getProjectIdsByAdmin(@Param("userId") Long userId);

@@ -28,6 +28,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/RelRolePortalMapper.xml
+ * XML statements: insert, insertBatch.
+ */
 @Component
 public interface RelRolePortalMapper {
 
@@ -43,12 +47,18 @@ public interface RelRolePortalMapper {
             "       inner join dashboard_portal p on p.id = rrp.portal_id",
             "where rru.user_id = #{userId} and rrp.visible = 0 and p.project_id = #{projectId}"
     })
+
+
     List<RoleDisableViz> getDisablePortalByUser(@Param("userId") Long userId, @Param("projectId") Long projectId);
 
     @Delete({"delete from rel_role_portal where portal_id = #{portalId}"})
+
+
     int deleteByPortalId(@Param("portalId") Long portalId);
 
     @Select("select role_id from rel_role_portal where portal_id = #{portalId} and visible = 0")
+
+
     List<Long> getExcludeRoles(@Param("portalId") Long portalId);
 
     @Select({
@@ -57,17 +67,27 @@ public interface RelRolePortalMapper {
             "inner join dashboard_portal p on p.id = rrp.portal_id",
             "where rrp.role_id = #{id} and rrp.visible = 0 and p.project_id = #{projectId}"
     })
+
+
     List<Long> getExcludePortals(@Param("id") Long id, @Param("projectId") Long projectId);
 
     @Delete({"delete from rel_role_portal where portal_id = #{portalId} and role_id = #{roleId}"})
+
+
     int delete(@Param("portalId") Long portalId, @Param("roleId") Long roleId);
 
     @Delete({"delete from rel_role_portal where role_id = #{roleId}"})
+
+
     int deleteByRoleId(Long roleId);
 
     @Delete({"delete from rel_role_portal where portal_id in (select id from dashboard_portal where project_id = #{projectId})"})
+
+
     int deleteByProject(Long projectId);
 
     @Delete({"delete from rel_role_portal where role_id = #{roleId} and portal_id in (select id from dashboard_portal where project_id = #{projectId})"})
+
+
     int deleteByRoleAndProject(@Param("roleId") Long roleId, @Param("projectId") Long projectId);
 }

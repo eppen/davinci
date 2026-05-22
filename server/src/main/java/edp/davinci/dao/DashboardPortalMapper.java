@@ -29,18 +29,26 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/DashboardPortalMapper.xml
+ * XML statements: insert.
+ */
 @Component
 public interface DashboardPortalMapper {
 
     int insert(DashboardPortal dashboardPortal);
 
     @Delete({"delete from dashboard_portal where id = #{id}"})
+
+
     int deleteById(@Param("id") Long id);
 
     @Select({"select * from dashboard_portal where id = #{id}"})
+
+
     DashboardPortal getById(@Param("id") Long id);
 
-    @Update({
+    @Update(value = {
             "update dashboard_portal",
             "set `name` = #{name,jdbcType=VARCHAR},",
             "description = #{description,jdbcType=VARCHAR},",
@@ -50,16 +58,23 @@ public interface DashboardPortalMapper {
             "update_by = #{updateBy,jdbcType=BIGINT},",
             "update_time = #{updateTime,jdbcType=TIMESTAMP}",
             "where id = #{id,jdbcType=BIGINT}"
-    })
+    }, databaseId = "mysql")
+
+    @Update(value = {"update dashboard_portal", "set [name] = #{name,jdbcType=VARCHAR},", "description = #{description,jdbcType=VARCHAR},", "project_id = #{projectId,jdbcType=BIGINT},", "avatar = #{avatar,jdbcType=VARCHAR},", "publish = #{publish,jdbcType=BIT},", "update_by = #{updateBy,jdbcType=BIGINT},", "update_time = #{updateTime,jdbcType=TIMESTAMP}", "where id = #{id,jdbcType=BIGINT}"}, databaseId = "sqlserver")
+
     int update(DashboardPortal dashboardPortal);
 
     @Select({"select id from dashboard_portal where project_id = #{projectId} and name = #{name}"})
+
+
     Long getByNameWithProjectId(@Param("name") String name, @Param("projectId") Long projectId);
 
     @Select({"select * from dashboard_portal where project_id = #{projectId}"})
+
+
     List<DashboardPortal> getByProject(@Param("projectId") Long projectId);
 
-    @Select({
+    @Select(value = {
             "SELECT ",
             "	dp.*,",
             "	p.id 'project.id',",
@@ -73,9 +88,14 @@ public interface DashboardPortalMapper {
             "	dashboard_portal dp ",
             "	LEFT JOIN project p on p.id = dp.project_id",
             "WHERE dp.id = #{id}",
-    })
+    }, databaseId = "mysql")
+
+    @Select(value = {"SELECT ", "	dp.*,", "	p.id 'project.id',", "	p.[name] 'project.name',", "	p.description 'project.description',", "	p.pic 'project.pic',", "	p.org_id 'project.orgId',", "	p.user_id 'project.userId',", "	p.visibility 'p.visibility'", "FROM", "	dashboard_portal dp ", "	LEFT JOIN project p on p.id = dp.project_id", "WHERE dp.id = #{id}"}, databaseId = "sqlserver")
+
     PortalWithProject getPortalWithProjectById(@Param("id") Long id);
 
     @Delete({"delete from dashboard_portal where project_id = #{projectId}"})
+
+
     int deleteByProject(@Param("projectId") Long projectId);
 }

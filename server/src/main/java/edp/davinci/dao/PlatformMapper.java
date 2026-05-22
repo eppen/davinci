@@ -28,5 +28,7 @@ import org.springframework.stereotype.Component;
 public interface PlatformMapper {
 
     @Select("select * from platform where code = #{code}")
+
+
     Platform getPlatformByCode(@Param("code") String code);
 }

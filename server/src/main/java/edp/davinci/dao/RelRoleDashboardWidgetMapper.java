@@ -27,6 +27,10 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/RelRoleDashboardWidgetMapper.xml
+ * XML statements: insertBatch, deleteByMemDashboardWidgetIds.
+ */
 @Component
 public interface RelRoleDashboardWidgetMapper {
 
@@ -35,9 +39,13 @@ public interface RelRoleDashboardWidgetMapper {
     int deleteByMemDashboardWidgetIds(@Param("memDashboardWidgetIds") Set<Long> memDashboardWidgetIds);
 
     @Delete({"delete from rel_role_dashboard_widget where mem_dashboard_widget_id = #{memDashboardWidgetId}"})
+
+
     int deleteByMemDashboardWidgetId(@Param("memDashboardWidgetId") Long memDashboardWidgetId);
 
     @Delete({"delete from rel_role_dashboard_widget where role_id = #{roleId}"})
+
+
     int deleteByRoleId(@Param("roleId") Long roleId);
 
     @Delete({"DELETE rrdw FROM rel_role_dashboard_widget rrdw WHERE rrdw.mem_dashboard_widget_id IN " +
@@ -47,6 +55,8 @@ public interface RelRoleDashboardWidgetMapper {
             "INNER JOIN dashboard d ON d.id = mdw.dashboard_id " +
             "WHERE d.dashboard_portal_id = #{portalId} " +
             ") "})
+
+
     int deleteByPortalId(@Param("portalId") Long portalId);
 
     @Delete({"DELETE rrdw FROM rel_role_dashboard_widget rrdw WHERE rrdw.mem_dashboard_widget_id IN " +
@@ -55,6 +65,8 @@ public interface RelRoleDashboardWidgetMapper {
             "FROM mem_dashboard_widget mdw " +
             "WHERE mdw.dashboard_id = #{dashboardId} " +
             ") "})
+
+
     int deleteByDashboardId(@Param("dashboardId") Long dashboardId);
 
     @Select({
@@ -63,6 +75,8 @@ public interface RelRoleDashboardWidgetMapper {
                     "INNER JOIN rel_role_user rru ON rru.role_id = rrdw.role_id " +
                     "WHERE rru.user_id = #{userId} AND rrdw.visible = 0 "
     })
+
+
     List<Long> getDisableByUser(@Param("userId") Long userId);
 
     @Delete({"DELETE rrdw FROM rel_role_dashboard_widget rrdw WHERE rrdw.mem_dashboard_widget_id IN " +
@@ -73,6 +87,8 @@ public interface RelRoleDashboardWidgetMapper {
             "INNER JOIN dashboard_portal dp ON dp.id = d.dashboard_portal_id " +
             "WHERE dp.project_id = #{projectId} " +
             ") "})
+
+
     int deleteByProject(@Param("projectId") Long projectId);
 
     @Delete({"DELETE rrdw FROM rel_role_dashboard_widget rrdw WHERE rrdw.role_id = #{roleId} and rrdw.mem_dashboard_widget_id IN " +
@@ -83,6 +99,8 @@ public interface RelRoleDashboardWidgetMapper {
             "INNER JOIN dashboard_portal dp ON dp.id = d.dashboard_portal_id " +
             "WHERE dp.project_id = #{projectId} " +
             ") "})
+
+
     int deleteByRoleAndProject(@Param("roleId") Long roleId, @Param("projectId") Long projectId);
 
 }

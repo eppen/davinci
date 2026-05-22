@@ -20,7 +20,7 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="edp.davinci.dao.DisplaySlideMapper">
-    <insert id="insert" parameterType="edp.davinci.model.DisplaySlide">
+    <insert id="insert" databaseId="mysql" parameterType="edp.davinci.model.DisplaySlide">
         <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
             SELECT LAST_INSERT_ID() AS id
         </selectKey>
@@ -39,9 +39,32 @@
             #{createBy,jdbcType=BIGINT},
             #{createTime,jdbcType=TIMESTAMP}
         </trim>
+    
     </insert>
 
-    <insert id="copySlide">
+    <insert id="insert" databaseId="sqlserver" parameterType="edp.davinci.model.DisplaySlide">
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT SCOPE_IDENTITY() AS id
+        </selectKey>
+        insert into display_slide
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            [display_id],
+            [index],
+            [config],
+            [create_by],
+            [create_time]
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{displayId,jdbcType=BIGINT},
+            #{index,jdbcType=INTEGER},
+            #{config,jdbcType=LONGVARCHAR},
+            #{createBy,jdbcType=BIGINT},
+            #{createTime,jdbcType=TIMESTAMP}
+        </trim>
+    
+    </insert>
+
+    <insert databaseId="mysql" id="copySlide">
         insert into display_slide
         <trim prefix="(" suffix=")" suffixOverrides=",">
             `display_id`,
@@ -54,7 +77,20 @@
         from display_slide where display_id = #{originDisplayId}
     </insert>
 
-    <update id="updateBatch" parameterType="java.util.List">
+    <insert databaseId="sqlserver" id="copySlide">
+        insert into display_slide
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            [display_id],
+            [index],
+            [config],
+            [create_by],
+            [create_time]
+        </trim>
+        select ${displayId}, [index], [config], ${useId}, GETDATE()
+        from display_slide where display_id = #{originDisplayId}
+    </insert>
+
+    <update databaseId="mysql" id="updateBatch" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
             update display_slide
             <set>
@@ -70,10 +106,39 @@
         </foreach>
     </update>
 
-    <select id="queryByDisplayIds" resultType="edp.davinci.model.DisplaySlide">
+    <update databaseId="sqlserver" id="updateBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update display_slide
+            <set>
+                [display_id]=#{item.displayId,jdbcType=BIGINT},
+                [index]=#{item.index,jdbcType=INTEGER},
+                [config]=#{item.config,jdbcType=LONGVARCHAR},
+                [update_by] = #{item.updateBy,jdbcType=BIGINT},
+                [update_time] = #{item.updateTime,jdbcType=TIMESTAMP}
+            </set>
+            <where>
+                [id]=#{item.id,jdbcType=BIGINT}
+            </where>
+        </foreach>
+    </update>
+
+    <select databaseId="mysql" id="queryByDisplayIds" resultType="edp.davinci.model.DisplaySlide">
         select `id`, `display_id`, `index` from display_slide
         <if test="displayIds != null and displayIds.size > 0">
             where `display_id` in
+            <foreach collection="displayIds" index="index" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="displayIds == null or displayIds.size == 0">
+            where 1=0
+        </if>
+    </select>
+
+    <select databaseId="sqlserver" id="queryByDisplayIds" resultType="edp.davinci.model.DisplaySlide">
+        select [id], [display_id], [index] from display_slide
+        <if test="displayIds != null and displayIds.size > 0">
+            where [display_id] in
             <foreach collection="displayIds" index="index" item="item" open="(" close=")" separator=",">
                 #{item}
             </foreach>

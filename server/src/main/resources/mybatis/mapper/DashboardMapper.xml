@@ -21,7 +21,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="edp.davinci.dao.DashboardMapper">
 
-    <insert id="insert" parameterType="edp.davinci.model.Dashboard">
+    <insert id="insert" databaseId="mysql" parameterType="edp.davinci.model.Dashboard">
         <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
             SELECT LAST_INSERT_ID() AS id
         </selectKey>
@@ -48,10 +48,44 @@
             #{createBy,jdbcType=BIGINT},
             #{createTime,jdbcType=TIMESTAMP}
         </trim>
+    
+
     </insert>
 
 
-    <update id="updateBatch" parameterType="java.util.List">
+    <insert id="insert" databaseId="sqlserver" parameterType="edp.davinci.model.Dashboard">
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT SCOPE_IDENTITY() AS id
+        </selectKey>
+        insert into dashboard
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            [name],
+            [dashboard_portal_id],
+            [type],
+            [index],
+            [parent_id],
+            [config],
+            [full_parent_id],
+            [create_by],
+            [create_time]
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{name,jdbcType=VARCHAR},
+            #{dashboardPortalId,jdbcType=BIGINT},
+            #{type,jdbcType=SMALLINT},
+            #{index,jdbcType=INTEGER},
+            #{parentId,jdbcType=BIGINT},
+            #{config,jdbcType=LONGVARCHAR},
+            #{fullParentId,jdbcType=VARCHAR},
+            #{createBy,jdbcType=BIGINT},
+            #{createTime,jdbcType=TIMESTAMP}
+        </trim>
+    
+
+    </insert>
+
+
+    <update databaseId="mysql" id="updateBatch" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
             update dashboard
             <set>
@@ -71,8 +105,28 @@
         </foreach>
     </update>
 
+    <update databaseId="sqlserver" id="updateBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update dashboard
+            <set>
+                [name] = #{item.name,jdbcType=VARCHAR},
+                [dashboard_portal_id] = #{item.dashboardPortalId,jdbcType=BIGINT},
+                [type] = #{item.type,jdbcType=SMALLINT},
+                [index] = #{item.index,jdbcType=INTEGER},
+                [parent_id] = #{item.parentId,jdbcType=BIGINT},
+                [full_parent_id] = #{item.fullParentId,jdbcType=BIGINT},
+                [config] = #{item.config,jdbcType=LONGVARCHAR},
+                [update_by] = #{item.updateBy,jdbcType=BIGINT},
+                [update_time] = #{item.updateTime,jdbcType=TIMESTAMP}
+            </set>
+            <where>
+                id=#{item.id,jdbcType=BIGINT}
+            </where>
+        </foreach>
+    </update>
 
-    <select id="queryByParentIds" resultType="edp.davinci.model.Dashboard" parameterType="java.util.Set">
+
+    <select databaseId="mysql" id="queryByParentIds" resultType="edp.davinci.model.Dashboard" parameterType="java.util.Set">
         select `id`, `full_parent_Id` from dashboard
         <if test="parentIds != null and parentIds.size > 0">
             where `id` in
@@ -85,10 +139,36 @@
         </if>
     </select>
 
-    <select id="getIdSetByIds" resultType="java.lang.Long" parameterType="java.util.Set">
+    <select databaseId="sqlserver" id="queryByParentIds" resultType="edp.davinci.model.Dashboard" parameterType="java.util.Set">
+        select [id], [full_parent_Id] from dashboard
+        <if test="parentIds != null and parentIds.size > 0">
+            where [id] in
+            <foreach collection="parentIds" index="index" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="parentIds == null or parentIds.size == 0">
+            where 1=0
+        </if>
+    </select>
+
+    <select databaseId="mysql" id="getIdSetByIds" resultType="java.lang.Long" parameterType="java.util.Set">
         select `id` from dashboard
         <if test="set != null and set.size > 0">
             where `id` in
+            <foreach collection="set" index="index" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="set == null or set.size == 0">
+            where 1=0
+        </if>
+    </select>
+
+    <select databaseId="sqlserver" id="getIdSetByIds" resultType="java.lang.Long" parameterType="java.util.Set">
+        select [id] from dashboard
+        <if test="set != null and set.size > 0">
+            where [id] in
             <foreach collection="set" index="index" item="item" open="(" close=")" separator=",">
                 #{item}
             </foreach>
@@ -111,10 +191,23 @@
         </if>
     </select>
 
-    <select id="queryByPortals" resultType="edp.davinci.model.Dashboard">
+    <select databaseId="mysql" id="queryByPortals" resultType="edp.davinci.model.Dashboard">
         select * from dashboard where
         <if test="set != null and set.size > 0">
             `dashboard_portal_id` in
+            <foreach collection="set" index="index" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="set == null or set.size == 0">
+            1=0
+        </if>
+    </select>
+
+    <select databaseId="sqlserver" id="queryByPortals" resultType="edp.davinci.model.Dashboard">
+        select * from dashboard where
+        <if test="set != null and set.size > 0">
+            [dashboard_portal_id] in
             <foreach collection="set" index="index" item="item" open="(" close=")" separator=",">
                 #{item}
             </foreach>

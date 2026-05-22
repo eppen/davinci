@@ -28,6 +28,10 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/RelRoleDisplaySlideWidgetMapper.xml
+ * XML statements: insertBatch, copyRoleSlideWidgetRelation, deleteByMemDisplaySlideWidgetIds.
+ */
 @Component
 public interface RelRoleDisplaySlideWidgetMapper {
 
@@ -36,9 +40,13 @@ public interface RelRoleDisplaySlideWidgetMapper {
     int deleteByMemDisplaySlideWidgetIds(@Param("memDisplaySlideWidgetIds") Set<Long> memDisplaySlideWidgetIds);
 
     @Delete({"delete from rel_role_display_slide_widget where mem_display_slide_widget_id = #{memDisplaySlideWidgetId}"})
+
+
     int deleteByMemDisplaySlideWidgetId(@Param("memDisplaySlideWidgetId") Long memDisplaySlideWidgetId);
 
     @Delete({"delete from rel_role_display_slide_widget where role_id = #{roleId}"})
+
+
     int deleteByRoleId(@Param("roleId") Long roleId);
 
     @Delete({"DELETE rrdsw FROM rel_role_display_slide_widget rrdsw WHERE rrdsw.mem_display_slide_widget_id IN " +
@@ -48,6 +56,8 @@ public interface RelRoleDisplaySlideWidgetMapper {
             "INNER JOIN display_slide ds ON ds.id = mdsw.display_slide_id " +
             "WHERE ds.display_id = #{displayId} " +
             ") "})
+
+
     int deleteByDisplayId(@Param("displayId") Long displayId);
 
     @Delete({"DELETE rrdsw FROM rel_role_display_slide_widget rrdsw WHERE rrdsw.mem_display_slide_widget_id IN " +
@@ -56,6 +66,8 @@ public interface RelRoleDisplaySlideWidgetMapper {
             "FROM mem_display_slide_widget mdsw " +
             "WHERE mdsw.display_slide_id = #{slideId} " +
             ") "})
+
+
     int deleteBySlideId(@Param("slideId") Long slideId);
 
     @Select({
@@ -64,6 +76,8 @@ public interface RelRoleDisplaySlideWidgetMapper {
                     "INNER JOIN rel_role_user rru ON rru.role_id = rrdsw.role_id " +
                     "WHERE rru.user_id = #{userId} AND rrdsw.visible = 0 "
     })
+
+
     List<Long> getDisableByUser(@Param("userId") Long userId);
 
     @Delete({"DELETE rrdsw FROM rel_role_display_slide_widget rrdsw WHERE rrdsw.mem_display_slide_widget_id IN " +
@@ -74,6 +88,8 @@ public interface RelRoleDisplaySlideWidgetMapper {
             "INNER JOIN display d ON d.id = ds.display_id " +
             "WHERE d.project_id = #{projectId} " +
             ") "})
+
+
     int deleteByProject(@Param("projectId") Long projectId);
 
     @Delete({"DELETE rrdsw FROM rel_role_display_slide_widget rrdsw WHERE rrdsw.role_id = #{roleId} and rrdsw.mem_display_slide_widget_id IN " +
@@ -84,6 +100,8 @@ public interface RelRoleDisplaySlideWidgetMapper {
         "INNER JOIN display d ON d.id = ds.display_id " +
         "WHERE d.project_id = #{projectId} " +
         ") "})
+
+
     int deleteByRoleAndProject(@Param("roleId") Long roleId, @Param("projectId") Long projectId);
 
     int copyRoleSlideWidgetRelation(@Param("relSlideCopies") List<RelModelCopy> memCopies, @Param("userId") Long userId);

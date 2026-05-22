@@ -65,17 +65,17 @@ public class StatisticServiceImpl implements StatisticService {
             return;
         }
 
-        String mysqlUrl = environment.getProperty("statistic.mysql_url");
-        if(StringUtils.isNotBlank(mysqlUrl)) {
-            String mysqlUsername = environment.getProperty("statistic.mysql_username");
-            String mysqlPassword = environment.getProperty("statistic.mysql_password");
+        String statisticJdbcUrl = environment.getProperty("statistic.mysql_url");
+        if(StringUtils.isNotBlank(statisticJdbcUrl)) {
+            String statisticUsername = environment.getProperty("statistic.mysql_username");
+            String statisticPassword = environment.getProperty("statistic.mysql_password");
             // Password encryption
-            String encrypt = SourcePasswordEncryptUtils.encrypt(mysqlPassword);
-            this.sqlUtils = this.sqlUtils.init("statistic", SourceTypeEnum.JDBC.getType(), mysqlUrl, mysqlUsername,
+            String encrypt = SourcePasswordEncryptUtils.encrypt(statisticPassword);
+            this.sqlUtils = this.sqlUtils.init("statistic", SourceTypeEnum.JDBC.getType(), statisticJdbcUrl, statisticUsername,
                     encrypt, null, null, false);
 
             List<Map<String, Object>> values = entityConvertIntoMap(infoList);
-            Set<QueryColumn> headers = getHeaders(mysqlUrl, tableName);
+            Set<QueryColumn> headers = getHeaders(statisticJdbcUrl, tableName);
             String sql = getInsertSql(clz, headers);
 
             sqlUtils.executeBatch(sql, headers, values);
@@ -89,15 +89,15 @@ public class StatisticServiceImpl implements StatisticService {
             return;
         }
 
-        mysqlUrl = environment.getProperty("spring.datasource.url");
-        String mysqlUsername = environment.getProperty("spring.datasource.username");
-        String mysqlPassword = environment.getProperty("spring.datasource.password");
+        statisticJdbcUrl = environment.getProperty("spring.datasource.url");
+        String datasourceUsername = environment.getProperty("spring.datasource.username");
+        String datasourcePassword = environment.getProperty("spring.datasource.password");
         // Password encryption
-        String encrypt = SourcePasswordEncryptUtils.encrypt(mysqlPassword);
-        this.sqlUtils = this.sqlUtils.init("statistic", SourceTypeEnum.JDBC.getType(), mysqlUrl, mysqlUsername, encrypt, null, null, false);
+        String encrypt = SourcePasswordEncryptUtils.encrypt(datasourcePassword);
+        this.sqlUtils = this.sqlUtils.init("statistic", SourceTypeEnum.JDBC.getType(), statisticJdbcUrl, datasourceUsername, encrypt, null, null, false);
 
         List<Map<String, Object>> values = entityConvertIntoMap(infoList);
-        Set<QueryColumn> headers = getHeaders(mysqlUrl, tableName);
+        Set<QueryColumn> headers = getHeaders(statisticJdbcUrl, tableName);
         String sql = getInsertSql(clz, headers);
 
         sqlUtils.executeBatch(sql, headers, values);

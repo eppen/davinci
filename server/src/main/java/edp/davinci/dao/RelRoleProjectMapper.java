@@ -32,6 +32,10 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/RelRoleProjectMapper.xml
+ * XML statements: insert, insertBatch, deleteByIds, getMaxPermissions, getMaxPermission, getByProject.
+ */
 @Component
 public interface RelRoleProjectMapper {
 
@@ -40,16 +44,22 @@ public interface RelRoleProjectMapper {
     @Delete({
             "delete from rel_role_project where id = #{relationId}"
     })
+
+
     int deleteById(@Param("relationId") Long relationId);
 
     @Delete({
             "delete from rel_role_project where project_id = #{projectId}"
     })
+
+
     int deleteByProjectId(@Param("projectId") Long projectId);
 
     @Select({
             "select * from rel_role_project where id = #{id,jdbcType=BIGINT}"
     })
+
+
     RelRoleProject getById(Long id);
 
     @Update({
@@ -67,11 +77,15 @@ public interface RelRoleProjectMapper {
             "update_time = #{updateTime,jdbcType=TIMESTAMP}",
             "where id = #{id,jdbcType=BIGINT}"
     })
+
+
     int update(RelRoleProject record);
 
     @Select({
             "select * from rel_role_project where role_id = #{roleId} and project_id = #{projectId}"
     })
+
+
     RelRoleProject getByRoleAndProject(@Param("roleId") Long roleId, @Param("projectId") Long projectId);
 
     List<UserMaxProjectPermission> getMaxPermissions(@Param("projectIds") Set<Long> projectIds, @Param("userId") Long userId);
@@ -83,6 +97,8 @@ public interface RelRoleProjectMapper {
     @Delete({
             "delete from rel_role_project where role_id = #{roleId}"
     })
+
+
     int deleteByRoleId(Long roleId);
 
     @Select({
@@ -93,6 +109,8 @@ public interface RelRoleProjectMapper {
             "       left join rel_role_project rrp on rrp.role_id = r.id",
             "where rrp.project_id = #{projectId}",
     })
+
+
     List<RoleBaseInfo> getRoleBaseInfoByProject(Long projectId);
 
     @Select({
@@ -110,11 +128,15 @@ public interface RelRoleProjectMapper {
             "       left join rel_role_project rrp on rrp.role_id = r.id",
             "where rrp.project_id = #{projectId} and rrp.role_id = #{roleId}",
     })
+
+
     RoleWithProjectPermission getPermission(@Param("projectId") Long projectId, @Param("roleId") Long roleId);
 
     @Delete({
             "delete from rel_role_project where role_id = #{roleId} and project_id = #{projectId}"
     })
+
+
     int deleteByRoleAndProject(@Param("roleId") Long roleId, @Param("projectId") Long projectId);
 
     List<RelRoleProject> getByProject(@Param("projectId") Long id);

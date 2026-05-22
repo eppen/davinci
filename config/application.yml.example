@@ -72,13 +72,24 @@ spring:
     proxy-ignore:
 
 
-  ## davinci datasource config
+  ## davinci datasource config (MySQL default)
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     url: jdbc:mysql://localhost:3306/davinci0.3?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true
     username: root
     password: root
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  ## SQL Server system database (uncomment and comment MySQL block above)
+  # datasource:
+  #   type: com.alibaba.druid.pool.DruidDataSource
+  #   url: jdbc:sqlserver://localhost:1433;databaseName=davinci;encrypt=true;trustServerCertificate=true
+  #   username: sa
+  #   password: your_password
+  #   driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  ## jTDS driver alternative:
+  #   url: jdbc:jtds:sqlserver://localhost:1433/davinci
+  #   driver-class-name: net.sourceforge.jtds.jdbc.Driver
     initial-size: 1
     min-idle: 1
     max-wait: 30000
@@ -209,3 +220,6 @@ statistic:
 encryption:
   maxEncryptSize: 1024
   type: Off # Off is to turn off encryption, to enable encryption, please select AES or RSA
+
+# pagehelper.helperDialect: leave unset to auto-detect from spring.datasource.url
+# mapper.identity: MYSQL (default) or SQLSERVER when using SQL Server system database

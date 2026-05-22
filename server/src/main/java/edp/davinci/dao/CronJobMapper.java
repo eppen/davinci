@@ -28,21 +28,32 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/CronJobMapper.xml
+ * XML statements: insert.
+ */
 @Component
 public interface CronJobMapper {
 
     int insert(CronJob cronJob);
 
     @Delete({"delete from cron_job where id = #{id,jdbcType=BIGINT}"})
+
+
     int deleteById(@Param("id") Long id);
 
     @Select({"select * from cron_job where id = #{id}"})
+
+
     CronJob getById(@Param("id") Long id);
 
-    @Select({"select * from cron_job where  job_status in ('stopped','failed') and update_time > (NOW() - INTERVAL 3 MINUTE)"})
+    @Select(value = {"select * from cron_job where  job_status in ('stopped','failed') and update_time > (NOW() - INTERVAL 3 MINUTE)"}, databaseId = "mysql")
+
+    @Select(value = {"select * from cron_job where job_status in ('stopped','failed') and update_time > DATEADD(MINUTE, -3, GETDATE())"}, databaseId = "sqlserver")
+
     List<CronJob> getStoppedJob();
 
-    @Update({
+    @Update(value = {
             "update cron_job",
             "set `name` = #{name,jdbcType=VARCHAR},",
             "`project_id` = #{projectId,jdbcType=BIGINT},",
@@ -57,25 +68,41 @@ public interface CronJobMapper {
             "`update_by` = #{updateBy,jdbcType=BIGINT},",
             "`update_time` = #{updateTime,jdbcType=TIMESTAMP}",
             "where `id` = #{id,jdbcType=BIGINT}"
-    })
+    }, databaseId = "mysql")
+
+    @Update(value = {"update cron_job", "set [name] = #{name,jdbcType=VARCHAR},", "[project_id] = #{projectId,jdbcType=BIGINT},", "[job_type] = #{jobType,jdbcType=VARCHAR},", "[job_status] = #{jobStatus,jdbcType=VARCHAR},", "[cron_expression] = #{cronExpression,jdbcType=VARCHAR},", "[start_date] = #{startDate,jdbcType=TIMESTAMP},", "[end_date] = #{endDate,jdbcType=TIMESTAMP},", "[description] = #{description,jdbcType=VARCHAR},", "[config] = #{config,jdbcType=LONGVARCHAR},", "[exec_log] = #{execLog,jdbcType=LONGVARCHAR},", "[update_by] = #{updateBy,jdbcType=BIGINT},", "[update_time] = #{updateTime,jdbcType=TIMESTAMP}", "where [id] = #{id,jdbcType=BIGINT}"}, databaseId = "sqlserver")
+
     int update(CronJob record);
 
-    @Update({
+    @Update(value = {
             "update cron_job",
             "set `exec_log` = #{execLog,jdbcType=LONGVARCHAR}",
             "where `id` = #{id,jdbcType=BIGINT}"
-    })
+    }, databaseId = "mysql")
+
+    @Update(value = {"update cron_job", "set [exec_log] = #{execLog,jdbcType=LONGVARCHAR}", "where [id] = #{id,jdbcType=BIGINT}"}, databaseId = "sqlserver")
+
     int updateExecLog(@Param("id") Long id, @Param("execLog") String execLog);
 
-    @Select({"select id from cron_job where project_id = #{projectId} and `name` = #{name}"})
+    @Select(value = {"select id from cron_job where project_id = #{projectId} and `name` = #{name}"}, databaseId = "mysql")
+
+    @Select(value = {"select id from cron_job where project_id = #{projectId} and [name] = #{name}"}, databaseId = "sqlserver")
+
     Long getByNameWithProjectId(@Param("name") String name, @Param("projectId") Long projectId);
 
     @Select({"select * from cron_job where project_id = #{projectId}"})
+
+
     List<CronJob> getByProject(@Param("projectId") Long projectId);
 
     @Select({"select * from cron_job where job_status = 'started'"})
+
+
     List<CronJob> getStartedJobs();
 
-    @Delete({"delete from `cron_job` where project_id = #{projectId}"})
+    @Delete(value = {"delete from `cron_job` where project_id = #{projectId}"}, databaseId = "mysql")
+
+    @Delete(value = {"delete from [cron_job] where project_id = #{projectId}"}, databaseId = "sqlserver")
+
     int deleteByProject(@Param("projectId") Long projectId);
 }

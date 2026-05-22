@@ -22,6 +22,7 @@ package edp.core.config;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.support.http.StatViewServlet;
 import com.alibaba.druid.support.http.WebStatFilter;
+import edp.core.utils.DatabaseDialect;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -156,9 +157,11 @@ public class DruidConfig {
         druidDataSource.setValidationQuery(validationQuery);
         druidDataSource.setValidationQueryTimeout(validationQueryTime);
 
-        Properties properties = new Properties();
-        properties.setProperty("druid.mysql.usePingMethod", "false");
-        druidDataSource.setConnectProperties(properties);
+        if (DatabaseDialect.isMySql(durl)) {
+            Properties properties = new Properties();
+            properties.setProperty("druid.mysql.usePingMethod", "false");
+            druidDataSource.setConnectProperties(properties);
+        }
 
         try {
             druidDataSource.setFilters(filters);

@@ -27,15 +27,23 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/FavoriteMapper.xml
+ * XML statements: insert, deleteBatch.
+ */
 @Component
 public interface FavoriteMapper {
 
     int insert(Favorite favorite);
 
     @Delete({"delete from favorite where id = #{id,jdbcType=BIGINT}"})
+
+
     int deleteById(Long id);
 
     @Delete({"delete from favorite where id = #{id,jdbcType=BIGINT}"})
+
+
     int delete(@Param("userId") Long userId, @Param("projectId") Long projectId);
 
     @Select({
@@ -44,6 +52,8 @@ public interface FavoriteMapper {
             "from favorite",
             "where id = #{id,jdbcType=BIGINT}"
     })
+
+
     Favorite selectById(Long id);
 
     int deleteBatch(@Param("list") List<Long> list, @Param("userId") Long userId);

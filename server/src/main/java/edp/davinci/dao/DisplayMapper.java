@@ -29,21 +29,31 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/DisplayMapper.xml
+ * XML statements: insert.
+ */
 @Component
 public interface DisplayMapper {
 
     int insert(Display display);
 
     @Delete({"delete from display where id = #{id}"})
+
+
     int deleteById(@Param("id") Long id);
 
     @Delete({"delete from display where project_id = #{projectId}"})
+
+
     int deleteByProject(@Param("projectId") Long projectId);
 
     @Select({"select * from display where id = #{id}"})
+
+
     Display getById(@Param("id") Long id);
 
-    @Update({
+    @Update(value = {
             "update display",
             "set `name` = #{name,jdbcType=VARCHAR},",
             "description = #{description,jdbcType=VARCHAR},",
@@ -54,10 +64,13 @@ public interface DisplayMapper {
             "update_by = #{updateBy,jdbcType=BIGINT},",
             "update_time = #{updateTime,jdbcType=TIMESTAMP}",
             "where id = #{id,jdbcType=BIGINT}"
-    })
+    }, databaseId = "mysql")
+
+    @Update(value = {"update display", "set [name] = #{name,jdbcType=VARCHAR},", "description = #{description,jdbcType=VARCHAR},", "project_id = #{projectId,jdbcType=BIGINT},", "avatar = #{avatar,jdbcType=VARCHAR},", "publish = #{publish,jdbcType=BIT},", "[config] = #{config,jdbcType=LONGVARCHAR},", "update_by = #{updateBy,jdbcType=BIGINT},", "update_time = #{updateTime,jdbcType=TIMESTAMP}", "where id = #{id,jdbcType=BIGINT}"}, databaseId = "sqlserver")
+
     int update(Display display);
 
-    @Select({
+    @Select(value = {
             "SELECT ",
             "	d.*,",
             "	p.id 'project.id',",
@@ -71,18 +84,29 @@ public interface DisplayMapper {
             "	display d ",
             "	LEFT JOIN project p on d.project_id = p.id",
             "WHERE d.id = #{id}",
-    })
+    }, databaseId = "mysql")
+
+    @Select(value = {"SELECT ", "	d.*,", "	p.id 'project.id',", "	p.[name] 'project.name',", "	p.description 'project.description',", "	p.pic 'project.pic',", "	p.org_id 'project.orgId',", "	p.user_id 'project.userId',", "	p.visibility 'p.visibility'", "FROM", "	display d ", "	LEFT JOIN project p on d.project_id = p.id", "WHERE d.id = #{id}"}, databaseId = "sqlserver")
+
     DisplayWithProject getDisplayWithProjectById(@Param("id") Long id);
 
     @Select({"select * from display where project_id = #{projectId}"})
+
+
     List<Display> getByProject(@Param("projectId") Long projectId);
 
-    @Select({"select id from display where project_id = #{projectId} and `name` = #{name}"})
+    @Select(value = {"select id from display where project_id = #{projectId} and `name` = #{name}"}, databaseId = "mysql")
+
+    @Select(value = {"select id from display where project_id = #{projectId} and [name] = #{name}"}, databaseId = "sqlserver")
+
     Long getByNameWithProjectId(@Param("name") String name, @Param("projectId") Long projectId);
 
-    @Select({
+    @Select(value = {
             "SELECT max(REPLACE(`name`,'${name}','')) ",
             "FROM display WHERE project_id = #{projectId} and `name` REGEXP CONCAT('${name}','[0-9]+')"
-    })
+    }, databaseId = "mysql")
+
+    @Select(value = {"SELECT max(REPLACE([name],'${name}','')) ", "FROM display WHERE project_id = #{projectId} and [name] REGEXP CONCAT('${name}','[0-9]+')"}, databaseId = "sqlserver")
+
     Integer selectMaxNameOrderByName(@Param("name") String name, @Param("projectId") Long projectId);
 }

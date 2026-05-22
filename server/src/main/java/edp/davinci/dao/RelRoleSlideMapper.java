@@ -29,6 +29,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/RelRoleSlideMapper.xml
+ * XML statements: insert, insertBatch, copyRoleSlideRelation.
+ */
 @Component
 public interface RelRoleSlideMapper {
 
@@ -37,6 +41,8 @@ public interface RelRoleSlideMapper {
     int insertBatch(List<RelRoleSlide> list);
 
     @Delete("delete from rel_role_slide where slide_id = #{slideId}")
+
+
     int deleteBySlideId(Long slideId);
 
     @Select({
@@ -46,11 +52,15 @@ public interface RelRoleSlideMapper {
             "inner join display_slide s on s.id = rrs.slide_id",
             "where rru.user_id = #{userId} and rrs.visible = 0 and s.display_id = #{displayId}"
     })
+
+
     List<RoleDisableViz> getDisableSlides(@Param("userId") Long userId, @Param("displayId") Long displayId);
 
     @Select({
             "select role_id from rel_role_slide where slide_id = #{slideId} and visible = 0"
     })
+
+
     List<Long> getById(Long slideId);
 
     @Select({
@@ -60,12 +70,18 @@ public interface RelRoleSlideMapper {
             "INNER JOIN display d on d.id = s.display_id",
             "where rrs.role_id = #{id} and rrs.visible = 0 and d.project_id = #{projectId}"
     })
+
+
     List<Long> getExcludeSlides(@Param("id") Long id, @Param("projectId") Long projectId);
 
     @Delete({"delete from rel_role_slide where slide_id = #{slideId} and role_id = #{roleId}"})
+
+
     int delete(@Param("slideId") Long slideId, @Param("roleId") Long roleId);
 
     @Delete({"delete from rel_role_slide where role_id = #{roleId}"})
+
+
     int deleteByRoleId(Long roleId);
 
     @Delete({"DELETE rrs FROM rel_role_slide rrs WHERE rrs.slide_id IN " +
@@ -74,6 +90,8 @@ public interface RelRoleSlideMapper {
             "FROM display_slide ds " +
             "WHERE ds.display_id = #{displayId} " +
             ") "})
+
+
     int deleteByDisplayId(@Param("displayId") Long displayId);
 
     int copyRoleSlideRelation(@Param("relSlideCopies") List<RelModelCopy> slideCopies, @Param("userId") Long userId);
@@ -84,6 +102,8 @@ public interface RelRoleSlideMapper {
             "left join display d on d.id = ds.display_id ",
             "where d.project_id = #{projectId})"
     })
+
+
     int deleteByProject(Long projectId);
     
     @Delete({
@@ -92,5 +112,7 @@ public interface RelRoleSlideMapper {
         "left join display d on d.id = ds.display_id ",
         "where d.project_id = #{projectId})"
     })
+
+
     int deleteByRoleAndProject(@Param("roleId") Long roleId, @Param("projectId") Long projectId);
 }

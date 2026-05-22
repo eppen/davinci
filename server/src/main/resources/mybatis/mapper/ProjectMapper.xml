@@ -21,7 +21,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="edp.davinci.dao.ProjectMapper">
 
-    <insert id="insert" parameterType="edp.davinci.model.Project">
+    <insert id="insert" databaseId="mysql" parameterType="edp.davinci.model.Project">
         <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
             SELECT LAST_INSERT_ID() AS id
         </selectKey>
@@ -59,6 +59,51 @@
             #{createTime, jdbcType=TIMESTAMP},
             #{createUserId, jdbcType=BIGINT}
         </trim>
+    
+
+    </insert>
+
+
+    <insert id="insert" databaseId="sqlserver" parameterType="edp.davinci.model.Project">
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT SCOPE_IDENTITY() AS id
+        </selectKey>
+        insert project
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            [name],
+            <if test="description != null">
+            [description],
+            </if>
+            <if test='pic != null and pic != "" '>
+                [pic],
+            </if>
+            [org_id],
+            [user_id],
+            [visibility],
+            [is_transfer],
+            [initial_org_id],
+            [create_time],
+            [create_by]
+        </trim>
+        values
+        <trim prefix=" (" suffix=")" suffixOverrides=",">
+            #{name, jdbcType=VARCHAR},
+            <if test="description != null">
+                #{description, jdbcType=VARCHAR},
+            </if>
+            <if test='pic != null and pic != "" '>
+                #{pic, jdbcType=VARCHAR},
+            </if>
+            #{orgId, jdbcType=BIGINT},
+            #{userId, jdbcType=BIGINT},
+            #{visibility, jdbcType=TINYINT},
+            #{isTransfer, jdbcType=TINYINT},
+            #{orgId, jdbcType=BIGINT},
+            #{createTime, jdbcType=TIMESTAMP},
+            #{createUserId, jdbcType=BIGINT}
+        </trim>
+    
+
     </insert>
 
     <delete id="deleteBeforeOrgRole">
@@ -181,7 +226,7 @@
     </sql>
 
 
-    <select id="getProjectsByKeywordsWithUser" resultType="edp.davinci.dto.projectDto.ProjectWithCreateBy">
+    <select databaseId="mysql" id="getProjectsByKeywordsWithUser" resultType="edp.davinci.dto.projectDto.ProjectWithCreateBy">
         <include refid="selectProjectByUserBaseSql"></include>
         <if test="orgList != null">
             AND p.org_id IN
@@ -195,14 +240,39 @@
         ORDER BY p.id
     </select>
 
+    <select databaseId="sqlserver" id="getProjectsByKeywordsWithUser" resultType="edp.davinci.dto.projectDto.ProjectWithCreateBy">
+        <include refid="selectProjectByUserBaseSql"></include>
+        <if test="orgList != null">
+            AND p.org_id IN
+            <foreach collection="orgList" index="index" item="item" open="(" close=")" separator=",">
+                #{item.id}
+            </foreach>
+        </if>
+        <if test="keywords != null">
+            AND LOWER(p.[name]) LIKE CONCAT(CONCAT('%', LOWER(#{keywords})), '%')
+        </if>
+        ORDER BY p.id
+    </select>
 
-    <select id="getProjectsByOrgWithUser" resultType="edp.davinci.dto.projectDto.ProjectWithCreateBy">
+
+    <select databaseId="mysql" id="getProjectsByOrgWithUser" resultType="edp.davinci.dto.projectDto.ProjectWithCreateBy">
         <include refid="selectProjectByUserBaseSql"></include>
         <if test="orgId != null">
             and p.org_id = #{orgId}
         </if>
         <if test="keyword != null">
             AND LOWER(p.`name`) LIKE CONCAT(CONCAT('%', LOWER(#{keyword})), '%')
+        </if>
+        ORDER BY p.id
+    </select>
+
+    <select databaseId="sqlserver" id="getProjectsByOrgWithUser" resultType="edp.davinci.dto.projectDto.ProjectWithCreateBy">
+        <include refid="selectProjectByUserBaseSql"></include>
+        <if test="orgId != null">
+            and p.org_id = #{orgId}
+        </if>
+        <if test="keyword != null">
+            AND LOWER(p.[name]) LIKE CONCAT(CONCAT('%', LOWER(#{keyword})), '%')
         </if>
         ORDER BY p.id
     </select>
@@ -238,7 +308,7 @@
            or (ruo.user_id = #{userId} and ruo.role > 0)
     </select>
 
-    <select id="getProjectDetail" resultType="edp.davinci.dto.projectDto.ProjectDetail">
+    <select databaseId="mysql" id="getProjectDetail" resultType="edp.davinci.dto.projectDto.ProjectDetail">
         SELECT p.*,
                u.`id`                                       AS 'createBy.id',
                IF(u.`name` is NULL, u.`username`, u.`name`) AS 'createBy.username',
@@ -261,6 +331,31 @@
                  LEFT JOIN organization o on o.`id` = p.`org_id`
                  LEFT JOIN `user` u on u.`id` = p.`user_id`
         WHERE p.`id` = #{id}
+    </select>
+
+    <select databaseId="sqlserver" id="getProjectDetail" resultType="edp.davinci.dto.projectDto.ProjectDetail">
+        SELECT p.*,
+               u.[id]                                       AS 'createBy.id',
+               IIF(u.[name] is NULL, u.[username], u.[name]) AS 'createBy.username',
+               u.[avatar]                                   AS 'createBy.avatar',
+               o.[id]                                       AS 'organization.id',
+               o.[name]                                     AS 'organization.name',
+               o.[description]                              AS 'organization.description',
+               o.[avatar]                                   AS 'organization.avatar',
+               o.[user_id]                                  AS 'organization.userId',
+               o.[project_num]                              AS 'organization.projectNum',
+               o.[member_num]                               AS 'organization.memberNum',
+               o.[role_num]                                 AS 'organization.teamNum',
+               o.[allow_create_project]                     AS 'organization.allowCreateProject',
+               o.[member_permission]                        AS 'organization.memberPermission',
+               o.[create_time]                              AS 'organization.createTime',
+               o.[create_by]                                AS 'organization.createBy',
+               o.[update_time]                              AS 'organization.updateTime',
+               o.[update_by]                                AS 'organization.updateBy'
+        FROM project p
+                 LEFT JOIN organization o on o.[id] = p.[org_id]
+                 LEFT JOIN [user] u on u.[id] = p.[user_id]
+        WHERE p.[id] = #{id}
     </select>
 
 </mapper>

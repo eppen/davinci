@@ -31,15 +31,23 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/OrganizationMapper.xml
+ * XML statements: insert, updateProjectNum, updateMemberNum, updateRoleNum, addOneMemberNum, getJointlyOrganization.
+ */
 @Component
 public interface OrganizationMapper {
 
     int insert(Organization organization);
 
     @Select({"select * from organization where id = #{id}"})
+
+
     Organization getById(@Param("id") Long id);
 
     @Select({"select id from organization where name = #{name}"})
+
+
     Long getIdByName(@Param("name") String name);
 
     /**
@@ -59,9 +67,11 @@ public interface OrganizationMapper {
             "   SELECT org_id as id FROM rel_user_organization WHERE user_id = #{userId}",
             ")",
     })
+
+
     List<OrganizationInfo> getOrganizationByUser(@Param("userId") Long userId);
 
-    @Update({
+    @Update(value = {
             "update organization",
             "set `name` = #{name},",
             "description = #{description},",
@@ -72,8 +82,10 @@ public interface OrganizationMapper {
             "update_time = #{updateTime},",
             "update_by = #{updateBy}",
             "where id = #{id}"
-    })
-    
+    }, databaseId = "mysql")
+
+    @Update(value = {"update organization", "set [name] = #{name},", "description = #{description},", "avatar = #{avatar},", "user_id = #{userId},", "allow_create_project = #{allowCreateProject},", "member_permission = #{memberPermission},", "update_time = #{updateTime},", "update_by = #{updateBy}", "where id = #{id}"}, databaseId = "sqlserver")
+
     int update(Organization organization);
 
     int updateProjectNum(Organization organization);
@@ -85,6 +97,8 @@ public interface OrganizationMapper {
     int updateRoleNum(Organization organization);
 
     @Delete({"delete from organization where id = #{id}"})
+
+
     int deleteById(@Param("id") Long id);
 
     List<OrganizationInfo> getJointlyOrganization(@Param("list") List<Long> userIds, @Param("userId") Long userId);

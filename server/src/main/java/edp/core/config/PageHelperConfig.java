@@ -20,6 +20,7 @@
 package edp.core.config;
 
 import com.github.pagehelper.PageInterceptor;
+import edp.core.utils.DatabaseDialect;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,14 +33,21 @@ import java.util.Properties;
 @Configuration
 public class PageHelperConfig {
 
-    @Value("${pagehelper.helperDialect}")
-    private String helperDialect;
+    @Value("${spring.datasource.url}")
+    private String datasourceUrl;
+
+    @Value("${pagehelper.helperDialect:}")
+    private String configuredDialect;
 
     @Bean
     public PageInterceptor pageInterceptor() {
         PageInterceptor pageInterceptor = new PageInterceptor();
         Properties properties = new Properties();
-        properties.setProperty("helperDialect", helperDialect);
+        String dialect = configuredDialect;
+        if (dialect == null || dialect.trim().isEmpty()) {
+            dialect = DatabaseDialect.pageHelperDialect(datasourceUrl);
+        }
+        properties.setProperty("helperDialect", dialect);
         pageInterceptor.setProperties(properties);
         return pageInterceptor;
     }

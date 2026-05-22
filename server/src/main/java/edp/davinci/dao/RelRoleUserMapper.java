@@ -29,6 +29,10 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/RelRoleUserMapper.xml
+ * XML statements: insert, insertBatch, getUserIdsByIdAndMembers, getByIds, selectByUserAndRoles, deleteByRoleIdAndMemberIds.
+ */
 @Component
 public interface RelRoleUserMapper {
     int insert(RelRoleUser relRoleUser);
@@ -38,12 +42,16 @@ public interface RelRoleUserMapper {
     @Delete({
             "delete from rel_role_user where id = #{id,jdbcType=BIGINT}"
     })
+
+
     int deleteById(Long id);
 
 
     @Delete({
             "delete from rel_role_user where role_id = #{roleId,jdbcType=BIGINT}"
     })
+
+
     int deleteByRoleId(Long roleId);
 
 
@@ -53,6 +61,8 @@ public interface RelRoleUserMapper {
             "from rel_role_user",
             "where id = #{id,jdbcType=BIGINT}"
     })
+
+
     RelRoleUser getById(Long id);
 
 
@@ -62,11 +72,14 @@ public interface RelRoleUserMapper {
     Set<RelRoleUser> selectByUserAndRoles(@Param("userId") Long userId, @Param("roleIds") Set<Long> roleIds);
 
 
-    @Select({
+    @Select(value = {
             "SELECT rru.id, u.id as 'user.id', IFNULL(u.`name`, u.username) as 'user.username', u.avatar",
             "FROM rel_role_user rru LEFT JOIN `user` u on u.id = rru.user_id",
             "WHERE rru.role_id = #{id}",
-    })
+    }, databaseId = "mysql")
+
+    @Select(value = {"SELECT rru.id, u.id as 'user.id', IFNULL(u.[name], u.username) as 'user.username', u.avatar", "FROM rel_role_user rru LEFT JOIN [user] u on u.id = rru.user_id", "WHERE rru.role_id = #{id}"}, databaseId = "sqlserver")
+
     List<RelRoleMember> getMembersByRoleId(Long id);
 
     List<Long> getUserIdsByIdAndMembers(@Param("roleId") Long roleId, @Param("userList") List<Long> userList);
@@ -74,6 +87,8 @@ public interface RelRoleUserMapper {
     @Select({
             "select user_id from rel_role_user where role_id = #{roleId}"
     })
+
+
     List<Long> getUserIdsByRoleId(Long roleId);
 
     int deleteByRoleIdAndMemberIds(@Param("roleId") Long roleId, @Param("userIds") List<Long> userIds);

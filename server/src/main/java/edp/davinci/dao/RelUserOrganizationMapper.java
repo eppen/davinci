@@ -31,19 +31,27 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/RelUserOrganizationMapper.xml
+ * XML statements: insert, insertBatch, deleteBatch, selectOrgMembers.
+ */
 @Component
 public interface RelUserOrganizationMapper {
 
     int insert(RelUserOrganization relUserOrganization);
 
     @Select({"select * from rel_user_organization where user_id = #{userId} and org_id = #{orgId}"})
+
+
     RelUserOrganization getRel(@Param("userId") Long userId, @Param("orgId") Long orgId);
 
     @Delete("delete from rel_user_organization where org_id = #{orgId}")
+
+
     int deleteByOrgId(@Param("orgId") Long orgId);
 
 
-    @Select({
+    @Select(value = {
             "SELECT ruo.id, u.id AS 'user.id', ",
             "    IF(u.`name` is NULL,u.username,u.`name`) AS 'user.username', ",
             "    u.email, u.avatar AS 'user.avatar', ruo.role AS 'user.role'",
@@ -51,15 +59,22 @@ public interface RelUserOrganizationMapper {
             "LEFT JOIN rel_user_organization ruo on ruo.user_id = u.id",
             "LEFT JOIN organization o on o.id = ruo.org_id",
             "WHERE ruo.org_id = #{orgId}"
-    })
+    }, databaseId = "mysql")
+
+    @Select(value = {"SELECT ruo.id, u.id AS 'user.id', ", "    IF(u.[name] is NULL,u.username,u.[name]) AS 'user.username', ", "    u.email, u.avatar AS 'user.avatar', ruo.role AS 'user.role'", "FROM [user] u", "LEFT JOIN rel_user_organization ruo on ruo.user_id = u.id", "LEFT JOIN organization o on o.id = ruo.org_id", "WHERE ruo.org_id = #{orgId}"}, databaseId = "sqlserver")
+
     List<OrganizationMember> getOrgMembers(@Param("orgId") Long orgId);
 
     Set<UserBaseInfo> selectOrgMembers(@Param("orgId") Long orgId, @Param("ids") Set<Long> ids);
 
     @Select({"select * from rel_user_organization where id = #{id}"})
+
+
     RelUserOrganization getById(@Param("id") Long id);
 
     @Delete({"delete from rel_user_organization where id = #{id}"})
+
+
     int deleteById(@Param("id") Long id);
 
     @Update({
@@ -68,6 +83,8 @@ public interface RelUserOrganizationMapper {
             "update_time = #{updateTime,jdbcType=TIMESTAMP}",
             "where id= #{id}"
     })
+
+
     int updateMemberRole(RelUserOrganization relUserOrganization);
 
     int insertBatch(@Param("set") Set<RelUserOrganization> set);

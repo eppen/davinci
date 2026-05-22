@@ -29,6 +29,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/RelRoleDisplayMapper.xml
+ * XML statements: insert, insertBatch.
+ */
 @Component
 public interface RelRoleDisplayMapper {
     int insert(RelRoleDisplay record);
@@ -38,6 +42,8 @@ public interface RelRoleDisplayMapper {
     @Delete({
             "delete from rel_role_display where display_id = #{id}"
     })
+
+
     int deleteByDisplayId(Long id);
 
     @Select({
@@ -47,11 +53,15 @@ public interface RelRoleDisplayMapper {
             "       inner join display d on d.id = rrd.display_id",
             "where rru.user_id = #{userId} and rrd.visible = 0 and d.project_id = #{projectId}"
     })
+
+
     List<RoleDisableViz> getDisableDisplayByUser(@Param("userId") Long userId, @Param("projectId") Long projectId);
 
     @Select({
             "select role_id from rel_role_display where display_id = #{display_id} and visible = 0"
     })
+
+
     List<Long> getById(Long displayId);
 
     @Select({
@@ -60,23 +70,36 @@ public interface RelRoleDisplayMapper {
             "inner join display d on d.id = rrd.display_id",
             "where rrd.role_id = #{id} and rrd.visible = 0 and d.project_id = #{projectId}"
     })
+
+
     List<Long> getExcludeDisplays(@Param("id") Long id, @Param("projectId") Long projectId);
 
     @Delete({"delete from rel_role_display where display_id = #{displayId} and role_id = #{roleId}"})
+
+
     int delete(@Param("displayId") Long displayId, @Param("roleId") Long roleId);
 
     @Delete({"delete from rel_role_display where role_id = #{roleId}"})
+
+
     int deleteByRoleId(Long roleId);
 
-    @Insert({
+    @Insert(value = {
             "insert rel_role_display (role_id, display_id, visible, create_by, create_time)",
             "select role_id, ${copyDisplayId}, visible, ${userId}, now() from rel_role_display where display_id = #{originDisplayId}"
-    })
+    }, databaseId = "mysql")
+
+    @Insert(value = {"insert rel_role_display (role_id, display_id, visible, create_by, create_time)", "select role_id, ${copyDisplayId}, visible, ${userId}, GETDATE() from rel_role_display where display_id = #{originDisplayId}"}, databaseId = "sqlserver")
+
     int copyRoleRelation(@Param("originDisplayId") Long originDisplayId, @Param("copyDisplayId") Long copyDisplayId, @Param("userId") Long userId);
 
     @Delete({"delete from rel_role_display where display_id in (select id from display where project_id = #{projectId})"})
+
+
     int deleteByProject(Long projectId);
 
     @Delete({"delete from rel_role_display where role_id = #{roleId} and display_id in (select id from display where project_id = #{projectId})"})
+
+
     int deleteByRoleAndProject(@Param("roleId") Long roleId, @Param("projectId") Long projectId);
 }

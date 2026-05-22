@@ -29,6 +29,10 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/RelRoleDashboardMapper.xml
+ * XML statements: insert, insertBatch, deleteByDashboardIds.
+ */
 @Component
 public interface RelRoleDashboardMapper {
 
@@ -43,9 +47,13 @@ public interface RelRoleDashboardMapper {
             "   inner join dashboard d on d.id  = rrd.dashboard_id",
             "where rru.user_id = #{userId} and rrd.visible = 0 and d.dashboard_portal_id = #{portalId}"
     })
+
+
     List<RoleDisableViz> getDisableByUser(@Param("userId") Long userId, @Param("portalId") Long portalId);
 
     @Select("select role_id from rel_role_dashboard where dashboard_id = #{dashboardId} and visible = 0")
+
+
     List<Long> getExcludeRoles(@Param("dashboardId") Long dashboardId);
 
     int deleteByDashboardIds(@Param("dashboardIds") Set<Long> dashboardIds);
@@ -53,6 +61,8 @@ public interface RelRoleDashboardMapper {
     @Delete({
             "delete from rel_role_dashboard where dashboard_id in (select id from dashboard where id = #{id} or find_in_set(#{id}, full_parent_Id) > 0)"
     })
+
+
     int deleteByDashboardId(Long id);
 
     @Select({
@@ -62,12 +72,18 @@ public interface RelRoleDashboardMapper {
             "INNER JOIN dashboard_portal p on p.id = d.dashboard_portal_id",
             "where rrd.role_id = #{id} and rrd.visible = 0 and p.project_id = #{projectId}"
     })
+
+
     List<Long> getExcludeDashboards(@Param("id") Long id, @Param("projectId") Long projectId);
 
     @Delete({"delete from rel_role_dashboard where dashboard_id = #{dashboardId} and role_id = #{roleId}"})
+
+
     int delete(@Param("dashboardId") Long dashboardId, @Param("roleId") Long roleId);
 
     @Delete({"delete from rel_role_dashboard where role_id = #{roleId}"})
+
+
     int deleteByRoleId(Long roleId);
 
     @Delete({"DELETE rrd FROM rel_role_dashboard rrd WHERE rrd.dashboard_id IN " +
@@ -76,6 +92,8 @@ public interface RelRoleDashboardMapper {
             "FROM dashboard d " +
             "WHERE d.dashboard_portal_id = #{portalId} " +
             ") "})
+
+
     int deleteByPortalId(@Param("portalId") Long portalId);
 
     @Delete({
@@ -83,6 +101,8 @@ public interface RelRoleDashboardMapper {
             "select d.id from dashboard d left join dashboard_portal p on p.id = d.dashboard_portal_id ",
             "where p.project_id = #{projectId})"
     })
+
+
     int deleteByProject(Long projectId);
 
     @Delete({
@@ -90,5 +110,7 @@ public interface RelRoleDashboardMapper {
         "select d.id from dashboard d left join dashboard_portal p on p.id = d.dashboard_portal_id ",
         "where p.project_id = #{projectId})"
     })
+
+
     int deleteByRoleAndProject(@Param("roleId") Long roleId, @Param("projectId") Long projectId);
 }

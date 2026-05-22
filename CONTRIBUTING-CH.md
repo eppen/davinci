@@ -90,13 +90,17 @@ npm run build
 ```
 ├── bin                   # 脚本目录
   ├── migration             # 较大版本变动迁移脚本目录
-  ├── patch                 # 数据库补丁
+  ├── patch                 # MySQL 数据库补丁
+  ├── patch-sqlserver       # SQL Server 数据库补丁（与 patch 一一对应）
   	 ├── 001_beta5.sql        # 已发布补丁（命名规则：“序列_版本”）
   	 └── beta.sql             # 当期未发布补丁（固定名称）
   ├── build.sh
-  ├── davinci.sql           # 完整系统数据库脚本（包含所有补丁）
+  ├── davinci.sql           # MySQL 完整系统数据库脚本（包含所有补丁）
+  ├── davinci.sqlserver.sql # SQL Server 完整系统数据库脚本
   ├── initdb.bat            # 针对 Windows 环境的初始化数据库批处理脚本
   ├── initdb.sh             # 针对 Linux、Mac 环境的初始化数据库 Shell 脚本
+  ├── initdb-sqlserver.bat  # Windows SQL Server 初始化脚本（需 sqlcmd）
+  ├── initdb-sqlserver.sh   # Linux/Mac SQL Server 初始化脚本
   ├── restart-server.sh     # 针对 Linux、Mac 环境的重启服务脚本
   ├── run.bat               # 针对	Windows 环境的服务启停核心脚本						
   ├── start.bat             # 针对 Windows 环境的服务启动脚本
@@ -148,7 +152,13 @@ npm run build
 
 ##### 数据库
 1. 自行创建 Davinci 系统数据库；
-2. 修改 bin/initdb.sh 或 bin/initdb.bat 中的数据库相应信息并执行 或 直接在数据库客户端导入 bin/davinci.sql。
+2. **MySQL**：修改 bin/initdb.sh 或 bin/initdb.bat 中的数据库相应信息并执行，或直接在数据库客户端导入 bin/davinci.sql；
+3. **SQL Server**：导入 bin/davinci.sqlserver.sql，或执行 bin/initdb-sqlserver.sh / initdb-sqlserver.bat；升级补丁使用 bin/patch-sqlserver/ 目录（与 bin/patch/ 双轨维护）；
+4. 系统库使用 SQL Server 时，config/application.yml 中 `spring.datasource.url` 使用 `jdbc:sqlserver://...`，并设置 `mapper.identity: SQLSERVER`；PageHelper 方言可留空，将按 URL 自动识别。
+
+##### MyBatis 多数据库
+- 系统库 Mapper 使用 `databaseId`（`mysql` / `sqlserver`）区分方言，勿为每个库复制整套 XML；
+- 发版时同步维护 DDL（davinci.sql / davinci.sqlserver.sql）与 patch / patch-sqlserver。
 
 ##### 配置文件
 重命名 config/ 目录下 `application.yml.example` 文件为 `application.yml`，并配置相关属性。

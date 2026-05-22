@@ -29,18 +29,28 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/RoleMapper.xml
+ * XML statements: insert, selectByIdsAndOrgId, getRolesByIds.
+ */
 @Component
 public interface RoleMapper {
     int insert(Role record);
 
-    @Delete({
+    @Delete(value = {
             "delete from `role` where id = #{id,jdbcType=BIGINT}"
-    })
+    }, databaseId = "mysql")
+
+    @Delete(value = {"delete from [role] where id = #{id,jdbcType=BIGINT}"}, databaseId = "sqlserver")
+
     int deleteById(Long id);
 
-    @Select({
+    @Select(value = {
             "select * from `role` where id = #{id,jdbcType=BIGINT}"
-    })
+    }, databaseId = "mysql")
+
+    @Select(value = {"select * from [role] where id = #{id,jdbcType=BIGINT}"}, databaseId = "sqlserver")
+
     Role getById(Long id);
 
     @Select({
@@ -49,11 +59,13 @@ public interface RoleMapper {
                     "LEFT JOIN rel_role_user b ON b.role_id = a.id " +
                     "WHERE a.org_id = #{orgId,jdbcType=BIGINT} AND b.user_id = #{userId,jdbcType=BIGINT} "
     })
+
+
     List<Role> getRolesByOrgAndUser(@Param("orgId") Long orgId, @Param("userId") Long userId);
 
     List<Role> getRolesByIds(List<Long> list);
 
-    @Update({
+    @Update(value = {
             "update `role`",
             "set `org_id` = #{orgId,jdbcType=BIGINT},",
             "`name` = #{name,jdbcType=VARCHAR},",
@@ -63,17 +75,26 @@ public interface RoleMapper {
             "`update_by` = #{updateBy,jdbcType=BIGINT},",
             "`update_time` = #{updateTime,jdbcType=TIMESTAMP}",
             "where id = #{id,jdbcType=BIGINT}"
-    })
+    }, databaseId = "mysql")
+
+    @Update(value = {"update [role]", "set [org_id] = #{orgId,jdbcType=BIGINT},", "[name] = #{name,jdbcType=VARCHAR},", "[description] = #{description,jdbcType=VARCHAR},", "[create_by] = #{createBy,jdbcType=BIGINT},", "[create_time] = #{createTime,jdbcType=TIMESTAMP},", "[update_by] = #{updateBy,jdbcType=BIGINT},", "[update_time] = #{updateTime,jdbcType=TIMESTAMP}", "where id = #{id,jdbcType=BIGINT}"}, databaseId = "sqlserver")
+
     int update(Role record);
 
-    @Select({
+    @Select(value = {
             "select id, `name`, description  from `role` where org_id = #{orgId}"
-    })
+    }, databaseId = "mysql")
+
+    @Select(value = {"select id, [name], description  from [role] where org_id = #{orgId}"}, databaseId = "sqlserver")
+
     List<RoleBaseInfo> getBaseInfoByOrgId(Long orgId);
 
     List<Role> selectByIdsAndOrgId(@Param("orgId") Long orgId, @Param("roleIds") List<Long> roleIds);
 
-    @Delete({"delete from `role` where org_id = #{orgId}"})
+    @Delete(value = {"delete from `role` where org_id = #{orgId}"}, databaseId = "mysql")
+
+    @Delete(value = {"delete from [role] where org_id = #{orgId}"}, databaseId = "sqlserver")
+
     int deleteByOrg(Long orgId);
 
     @Select({
@@ -82,6 +103,8 @@ public interface RoleMapper {
             "INNER JOIN rel_role_user rru on rru.role_id = r.id",
             "WHERE p.id = #{portalId} and rru.user_id = #{userId}"
     })
+
+
     List<Long> getRolesByUserAndPortal(@Param("userId") Long userId, @Param("portalId") Long portalId);
 
     @Select({
@@ -90,6 +113,8 @@ public interface RoleMapper {
             "INNER JOIN rel_role_user rru on rru.role_id = r.id",
             "WHERE d.id = #{displayId} and rru.user_id = #{userId}"
     })
+
+
     List<Long> getRolesByUserAndDisplay(@Param("userId") Long userId, @Param("displayId") Long displayId);
 
     @Select({
@@ -98,6 +123,8 @@ public interface RoleMapper {
             "INNER JOIN rel_role_user rru on rru.role_id = r.id",
             "WHERE rrp.project_id = #{projectId} and rru.user_id = #{userId}"
     })
+
+
     List<Long> getRolesByUserAndProject(@Param("userId") Long userId, @Param("projectId") Long projectId);
 
     @Select({
@@ -105,5 +132,7 @@ public interface RoleMapper {
             "LEFT JOIN rel_role_user rru on rru.role_id = r.id",
             "WHERE r.org_id = #{orgId} and rru.user_id = #{memberId}"
     })
+
+
     List<Role> selectByOrgIdAndMemberId(@Param("orgId") Long orgId, @Param("memberId") Long memberId);
 }

@@ -22,6 +22,7 @@ package edp.davinci.core.config;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.github.pagehelper.PageInterceptor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
@@ -31,6 +32,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -49,6 +51,9 @@ public class DataSourceConfig {
     @Autowired
     private PageInterceptor pageInterceptor;
 
+    @Autowired
+    private DatabaseIdProvider databaseIdProvider;
+
     @Bean
     @ConfigurationProperties(prefix = "mybatis.configuration")
     public org.apache.ibatis.session.Configuration globalConfiguration() {
@@ -59,11 +64,15 @@ public class DataSourceConfig {
     public SqlSessionFactory sqlSessionFactory() throws Exception {
         SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
         sqlSessionFactoryBean.setDataSource(druidDataSource);
+        sqlSessionFactoryBean.setConfigLocation(new ClassPathResource("mybatis/mybatis-config.xml"));
         sqlSessionFactoryBean.setConfiguration(globalConfiguration());
+        sqlSessionFactoryBean.setDatabaseIdProvider(databaseIdProvider);
         sqlSessionFactoryBean.setPlugins(new Interceptor[]{pageInterceptor});
         sqlSessionFactoryBean.setTypeAliasesPackage(environment.getProperty("mybatis.type-aliases-package"));
         sqlSessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(environment.getProperty("mybatis.mapper-locations")));
-        return sqlSessionFactoryBean.getObject();
+        SqlSessionFactory factory = sqlSessionFactoryBean.getObject();
+        log.info("MyBatis databaseId: {}", factory.getConfiguration().getDatabaseId());
+        return factory;
     }
 
 }

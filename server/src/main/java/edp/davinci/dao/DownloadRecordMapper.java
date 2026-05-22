@@ -27,6 +27,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/DownloadRecordMapper.xml
+ * XML statements: insert.
+ */
 @Component
 public interface DownloadRecordMapper {
 
@@ -35,23 +39,33 @@ public interface DownloadRecordMapper {
     @Delete({
             "delete from download_record where id = #{id,jdbcType=BIGINT}"
     })
+
+
     int deleteById(Long id);
 
     @Select({
             "select * from download_record where id = #{id,jdbcType=BIGINT}"
     })
+
+
     DownloadRecord getById(Long id);
 
 
-    @Delete({
+    @Delete(value = {
             "delete from download_record where create_time < DATE_FORMAT((NOW() - INTERVAL 1 MONTH),'%Y%m%d')"
-    })
+    }, databaseId = "mysql")
+
+    @Delete(value = {"delete from download_record where create_time < DATE_FORMAT((GETDATE() - INTERVAL 1 MONTH),'%Y%m%d')"}, databaseId = "sqlserver")
+
     int deleteBeforeAMonthRecord();
 
 
-    @Select({
+    @Select(value = {
             "select * from download_record where user_id = #{userId} and create_time > DATE_FORMAT((NOW() - INTERVAL 7 DAY),'%Y%m%d')  order by create_time desc"
-    })
+    }, databaseId = "mysql")
+
+    @Select(value = {"select * from download_record where user_id = #{userId} and create_time > DATE_FORMAT((GETDATE() - INTERVAL 7 DAY),'%Y%m%d')  order by create_time desc"}, databaseId = "sqlserver")
+
     List<DownloadRecord> getDownloadRecordsByUser(Long userId);
 
     @Update({
@@ -61,5 +75,7 @@ public interface DownloadRecordMapper {
             "last_download_time = #{lastDownloadTime,jdbcType=TIMESTAMP}",
             "where id = #{id,jdbcType=BIGINT}"
     })
+
+
     int updateById(DownloadRecord downloadRecord);
 }

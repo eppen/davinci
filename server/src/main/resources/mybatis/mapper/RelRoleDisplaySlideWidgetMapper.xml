@@ -20,7 +20,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="edp.davinci.dao.RelRoleDisplaySlideWidgetMapper">
 
-    <insert id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+    <insert databaseId="mysql" id="insertBatch" useGeneratedKeys="true" keyProperty="id">
         replace into rel_role_display_slide_widget
         (`role_id`, `mem_display_slide_widget_id`, `visible`, `create_by`, `create_time`)
         VALUES
@@ -35,11 +35,35 @@
         </foreach>
     </insert>
 
-    <insert id="copyRoleSlideWidgetRelation">
+    <insert databaseId="sqlserver" id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+        insert into rel_role_display_slide_widget
+        ([role_id], [mem_display_slide_widget_id], [visible], [create_by], [create_time])
+        VALUES
+        <foreach collection="list" item="record" index="index" separator=",">
+            (
+            #{record.roleId,jdbcType=BIGINT},
+            #{record.memDisplaySlideWidgetId,jdbcType=BIGINT},
+            #{record.visible,jdbcType=TINYINT},
+            #{record.createBy,jdbcType=BIGINT},
+            #{record.createTime,jdbcType=TIMESTAMP}
+            )
+        </foreach>
+    </insert>
+
+    <insert databaseId="mysql" id="copyRoleSlideWidgetRelation">
         <foreach collection="relSlideCopies" item="copy" open="" close="" separator=";">
             replace into rel_role_display_slide_widget
             (`role_id`, `mem_display_slide_widget_id`, `visible`, `create_by`, `create_time`)
             select `role_id`, ${copy.copyId}, `visible`, ${userId}, NOW() from rel_role_display_slide_widget
+            where mem_display_slide_widget_id = #{copy.originId}
+        </foreach>
+    </insert>
+
+    <insert databaseId="sqlserver" id="copyRoleSlideWidgetRelation">
+        <foreach collection="relSlideCopies" item="copy" open="" close="" separator=";">
+            insert into rel_role_display_slide_widget
+            ([role_id], [mem_display_slide_widget_id], [visible], [create_by], [create_time])
+            select [role_id], ${copy.copyId}, [visible], ${userId}, GETDATE() from rel_role_display_slide_widget
             where mem_display_slide_widget_id = #{copy.originId}
         </foreach>
     </insert>

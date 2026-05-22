@@ -28,6 +28,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/RelProjectAdminMapper.xml
+ * XML statements: insert, insertBatch.
+ */
 @Component
 public interface RelProjectAdminMapper {
 
@@ -36,29 +40,39 @@ public interface RelProjectAdminMapper {
     @Select({
             "select * from rel_project_admin where project_id = #{projectId} and user_id = #{userId}"
     })
+
+
     RelProjectAdmin getByProjectAndUser(@Param("projectId") Long projectId, @Param("userId") Long userId);
 
     @Delete({
             "delete from rel_project_admin where id = #{id,jdbcType=BIGINT}"
     })
+
+
     int deleteById(Long id);
 
     @Delete({
             "delete from rel_project_admin where project_id = #{projectId} and user_id = #{userId}"
     })
+
+
     int delete(@Param("projectId") Long projectId, @Param("userId") Long userId);
 
     @Select({
             "select * from rel_project_admin where id = #{id,jdbcType=BIGINT}"
     })
+
+
     RelProjectAdmin getById(Long id);
 
     @Delete({
             "delete from rel_project_admin where project_id = #{projectId}"
     })
+
+
     int deleteByProjectId(Long projectId);
 
-    @Select({
+    @Select(value = {
             "select r.id,",
             "    u.id                         as 'user.id',",
             "    ifnull(u.`name`, u.username) as 'user.username',",
@@ -66,15 +80,21 @@ public interface RelProjectAdminMapper {
             "from rel_project_admin r",
             "    left join `user` u on u.id = r.user_id",
             "where r.project_id = #{projectId}"
-    })
+    }, databaseId = "mysql")
+
+    @Select(value = {"select r.id,", "    u.id                         as 'user.id',", "    ifnull(u.[name], u.username) as 'user.username',", "    u.avatar                     as 'user.avatar'", "from rel_project_admin r", "    left join [user] u on u.id = r.user_id", "where r.project_id = #{projectId}"}, databaseId = "sqlserver")
+
     List<RelProjectAdminDto> getByProject(Long projectId);
 
-    @Select({
+    @Select(value = {
             "select r.user_id",
             "from rel_project_admin r",
             "    left join `user` u on u.id = r.user_id",
             "where r.project_id = #{projectId}"
-    })
+    }, databaseId = "mysql")
+
+    @Select(value = {"select r.user_id", "from rel_project_admin r", "    left join [user] u on u.id = r.user_id", "where r.project_id = #{projectId}"}, databaseId = "sqlserver")
+
     List<Long> getAdminIds(Long projectId);
 
     int insertBatch(List<RelProjectAdmin> list);

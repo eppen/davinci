@@ -20,7 +20,7 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="edp.davinci.dao.RelUserOrganizationMapper">
-    <insert id="insert" parameterType="edp.davinci.model.RelUserOrganization">
+    <insert id="insert" databaseId="mysql" parameterType="edp.davinci.model.RelUserOrganization">
         <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
             SELECT LAST_INSERT_ID() AS id
         </selectKey>
@@ -40,12 +40,51 @@
             #{createBy, jdbcType=BIGINT},
             #{createTime, jdbcType=TIMESTAMP}
         </trim>
+    
+    </insert>
+
+    <insert id="insert" databaseId="sqlserver" parameterType="edp.davinci.model.RelUserOrganization">
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT SCOPE_IDENTITY() AS id
+        </selectKey>
+        insert into rel_user_organization
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            [org_id],
+            [user_id],
+            [role],
+            [create_by],
+            [create_time]
+        </trim>
+        values
+        <trim prefix=" (" suffix=")" suffixOverrides=",">
+            #{orgId, jdbcType=BIGINT},
+            #{userId, jdbcType=BIGINT},
+            #{role, jdbcType=SMALLINT},
+            #{createBy, jdbcType=BIGINT},
+            #{createTime, jdbcType=TIMESTAMP}
+        </trim>
+    
     </insert>
 
 
-    <insert id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+    <insert databaseId="mysql" id="insertBatch" useGeneratedKeys="true" keyProperty="id">
         insert ignore into rel_user_organization
         (`org_id`,`user_id`, `role`, `create_by`, `create_time`)
+        values
+        <foreach collection="set" item="record" index="index" separator=",">
+            (
+            #{record.orgId,jdbcType=BIGINT},
+            #{record.userId,jdbcType=BIGINT},
+            #{record.role,jdbcType=SMALLINT},
+            #{record.createBy,jdbcType=BIGINT},
+            #{record.createTime,jdbcType=TIMESTAMP}
+            )
+        </foreach>
+    </insert>
+
+    <insert databaseId="sqlserver" id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+        insert into rel_user_organization
+        ([org_id],[user_id], [role], [create_by], [create_time])
         values
         <foreach collection="set" item="record" index="index" separator=",">
             (
@@ -72,9 +111,24 @@
         </if>
     </delete>
 
-    <select id="selectOrgMembers" resultType="edp.davinci.dto.userDto.UserBaseInfo">
+    <select databaseId="mysql" id="selectOrgMembers" resultType="edp.davinci.dto.userDto.UserBaseInfo">
         select DISTINCT u.id, IF(u.`name` is NULL,u.`username`,u.`name`) as username, u.`email`, u.`avatar`
         from `user` u left join rel_user_organization ruo on u.id = ruo.user_id
+        where ruo.org_id = #{orgId}
+        <if test="ids != null and ids.size > 0">
+            and u.id in
+            <foreach collection="ids" index="index" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="ids == null or ids.size == 0">
+            and 1=0
+        </if>
+    </select>
+
+    <select databaseId="sqlserver" id="selectOrgMembers" resultType="edp.davinci.dto.userDto.UserBaseInfo">
+        select DISTINCT u.id, IIF(u.[name] is NULL,u.[username],u.[name]) as username, u.[email], u.[avatar]
+        from [user] u left join rel_user_organization ruo on u.id = ruo.user_id
         where ruo.org_id = #{orgId}
         <if test="ids != null and ids.size > 0">
             and u.id in

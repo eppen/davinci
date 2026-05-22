@@ -71,7 +71,8 @@ pagehelper:
   supportMethodsArguments: true
   reasonable: true
   returnPageInfo: check
-  helperDialect: mysql
+  # leave empty to auto-detect from spring.datasource.url (mysql / sqlserver)
+  helperDialect:
   params: count=countSql
 
 

@@ -20,7 +20,7 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="edp.davinci.dao.FavoriteMapper">
-    <insert id="insert" parameterType="edp.davinci.model.Favorite">
+    <insert id="insert" databaseId="mysql" parameterType="edp.davinci.model.Favorite">
         <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
             SELECT LAST_INSERT_ID() AS id
         </selectKey>
@@ -35,13 +35,46 @@
             #{projectId,jdbcType=BIGINT},
             #{createTime,jdbcType=TIMESTAMP}
         </trim>
+    
+    </insert>
+
+    <insert id="insert" databaseId="sqlserver" parameterType="edp.davinci.model.Favorite">
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT SCOPE_IDENTITY() AS id
+        </selectKey>
+        insert into favorite
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            [user_id],
+            [project_id],
+            [create_time]
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{userId,jdbcType=BIGINT},
+            #{projectId,jdbcType=BIGINT},
+            #{createTime,jdbcType=TIMESTAMP}
+        </trim>
+    
     </insert>
 
 
-    <delete id="deleteBatch" parameterType="java.util.List">
+    <delete databaseId="mysql" id="deleteBatch" parameterType="java.util.List">
         DELETE FROM favorite WHERE `user_id` = #{userId}
         <if test="list != null and list.size > 0">
             and `project_id` in
+            <foreach collection="list" index="index" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="list == null or list.size == 0">
+            and 1=0
+        </if>
+
+    </delete>
+
+    <delete databaseId="sqlserver" id="deleteBatch" parameterType="java.util.List">
+        DELETE FROM favorite WHERE [user_id] = #{userId}
+        <if test="list != null and list.size > 0">
+            and [project_id] in
             <foreach collection="list" index="index" item="item" open="(" close=")" separator=",">
                 #{item}
             </foreach>

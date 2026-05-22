@@ -28,6 +28,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * MyBatis mapper. XML: server/src/main/resources/mybatis/mapper/RelRoleViewMapper.xml
+ * XML statements: insert, insertBatch.
+ */
 @Component
 public interface RelRoleViewMapper {
 
@@ -38,48 +42,66 @@ public interface RelRoleViewMapper {
     @Delete({
             "delete from rel_role_view where role_id = #{roleId} and view_id = #{viewId}"
     })
+
+
     int delete(@Param("roleId") Long roleId, @Param("viewId") Long viewId);
 
-    @Update({
+    @Update(value = {
             "update rel_role_view",
             "set `row_auth` = #{rowAuth, jdbcType=LONGVARCHAR},",
             "`column_auth` = #{columnAuth, jdbcType=LONGVARCHAR},",
             "update_by = #{updateBy, jdbcType=BIGINT},",
             "update_time = #{updateTime, jdbcType=TIMESTAMP}",
             "where role_id = #{roleId} and view_id = #{viewId}"
-    })
+    }, databaseId = "mysql")
+
+    @Update(value = {"update rel_role_view", "set [row_auth] = #{rowAuth, jdbcType=LONGVARCHAR},", "[column_auth] = #{columnAuth, jdbcType=LONGVARCHAR},", "update_by = #{updateBy, jdbcType=BIGINT},", "update_time = #{updateTime, jdbcType=TIMESTAMP}", "where role_id = #{roleId} and view_id = #{viewId}"}, databaseId = "sqlserver")
+
     int update(RelRoleView relRoleView);
 
     @Delete({
             "delete from rel_role_view where  view_id = #{viewId}"
     })
+
+
     int deleteByViewId(Long viewId);
 
     @Delete({
             "delete from rel_role_view where  role_id = #{roleId}"
     })
+
+
     int deleteByRoleId(Long roleId);
 
-    @Select({
+    @Select(value = {
             "select rrv.* from rel_role_view rrv",
             "       left join `view` v on v.id = rrv.view_id",
             "       left join rel_role_user rru on rru.role_id = rrv.role_id",
             "where v.id = #{viewId} and rru.user_id = #{userId}"
-    })
+    }, databaseId = "mysql")
+
+    @Select(value = {"select rrv.* from rel_role_view rrv", "       left join [view] v on v.id = rrv.view_id", "       left join rel_role_user rru on rru.role_id = rrv.role_id", "where v.id = #{viewId} and rru.user_id = #{userId}"}, databaseId = "sqlserver")
+
     List<RelRoleView> getByUserAndView(@Param("userId") Long userId, @Param("viewId") Long viewId);
 
     @Select({
            "select * from rel_role_view where view_id = #{viewId}"
     })
+
+
     List<RelRoleView> getByView(Long viewId);
 
     @Delete({
             "delete from rel_role_view where view_id in (select id from view where project_id = #{projectId})"
     })
+
+
     int deleteByProject(Long projectId);
 
     @Delete({ 
             "delete from rel_role_view where role_id = #{roleId} and view_id in (select id from view where project_id = #{projectId})" 
     })
+
+
     int deleteByRoleAndProject(@Param("roleId") Long roleId, @Param("projectId") Long projectId);
 }

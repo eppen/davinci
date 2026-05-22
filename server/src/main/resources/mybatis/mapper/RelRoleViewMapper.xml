@@ -21,7 +21,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="edp.davinci.dao.RelRoleViewMapper">
 
-    <insert id="insert" parameterType="edp.davinci.dao.RelRoleViewMapper">
+    <insert id="insert" databaseId="mysql" parameterType="edp.davinci.dao.RelRoleViewMapper">
         <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
             SELECT id from rel_role_view where `role_id` = #{roleId} and `view_id` = #{viewId}
         </selectKey>
@@ -43,10 +43,39 @@
             #{createBy,jdbcType=BIGINT},
             #{createTime,jdbcType=TIMESTAMP}
         </trim>
+    
+
     </insert>
 
 
-    <insert id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" databaseId="sqlserver" parameterType="edp.davinci.dao.RelRoleViewMapper">
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT id from rel_role_view where [role_id] = #{roleId} and [view_id] = #{viewId}
+        </selectKey>
+        insert into rel_role_view
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            [view_id],
+            [role_id],
+            [row_auth],
+            [column_auth],
+            [create_by],
+            [create_time],
+        </trim>
+        values
+        <trim prefix=" (" suffix=")" suffixOverrides=",">
+            #{viewId, jdbcType=BIGINT},
+            #{roleId, jdbcType=BIGINT},
+            #{rowAuth, jdbcType=LONGVARCHAR},
+            #{columnAuth, jdbcType=LONGVARCHAR},
+            #{createBy,jdbcType=BIGINT},
+            #{createTime,jdbcType=TIMESTAMP}
+        </trim>
+    
+
+    </insert>
+
+
+    <insert databaseId="mysql" id="insertBatch" useGeneratedKeys="true" keyProperty="id">
         replace into rel_role_view
         <trim prefix="(" suffix=")" suffixOverrides=",">
             `view_id`,
@@ -55,6 +84,29 @@
             `column_auth`,
             `create_by`,
             `create_time`,
+        </trim>
+        VALUES
+        <foreach collection="list" item="record" index="index" separator=",">
+            <trim prefix=" (" suffix=")" suffixOverrides=",">
+                #{record.viewId, jdbcType=BIGINT},
+                #{record.roleId, jdbcType=BIGINT},
+                #{record.rowAuth, jdbcType=LONGVARCHAR},
+                #{record.columnAuth, jdbcType=LONGVARCHAR},
+                #{record.createBy,jdbcType=BIGINT},
+                #{record.createTime,jdbcType=TIMESTAMP}
+            </trim>
+        </foreach>
+    </insert>
+
+    <insert databaseId="sqlserver" id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+        insert into rel_role_view
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            [view_id],
+            [role_id],
+            [row_auth],
+            [column_auth],
+            [create_by],
+            [create_time],
         </trim>
         VALUES
         <foreach collection="list" item="record" index="index" separator=",">
