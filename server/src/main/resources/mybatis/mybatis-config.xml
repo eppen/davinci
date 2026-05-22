@@ -22,10 +22,10 @@
         PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
-    <databaseIdProvider type="DB_VENDOR">
-        <property name="MySQL" value="mysql"/>
-        <property name="Microsoft SQL Server" value="sqlserver"/>
-    </databaseIdProvider>
+    <settings>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <setting name="useGeneratedKeys" value="true"/>
+    </settings>
     <typeAliases>
         <typeAlias alias="Integer" type="java.lang.Integer"/>
         <typeAlias alias="Long" type="java.lang.Long"/>

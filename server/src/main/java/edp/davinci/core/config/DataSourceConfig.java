@@ -28,7 +28,6 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -55,17 +54,10 @@ public class DataSourceConfig {
     private DatabaseIdProvider databaseIdProvider;
 
     @Bean
-    @ConfigurationProperties(prefix = "mybatis.configuration")
-    public org.apache.ibatis.session.Configuration globalConfiguration() {
-        return new org.apache.ibatis.session.Configuration();
-    }
-
-    @Bean
     public SqlSessionFactory sqlSessionFactory() throws Exception {
         SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
         sqlSessionFactoryBean.setDataSource(druidDataSource);
         sqlSessionFactoryBean.setConfigLocation(new ClassPathResource("mybatis/mybatis-config.xml"));
-        sqlSessionFactoryBean.setConfiguration(globalConfiguration());
         sqlSessionFactoryBean.setDatabaseIdProvider(databaseIdProvider);
         sqlSessionFactoryBean.setPlugins(new Interceptor[]{pageInterceptor});
         sqlSessionFactoryBean.setTypeAliasesPackage(environment.getProperty("mybatis.type-aliases-package"));
