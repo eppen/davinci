@@ -24,6 +24,7 @@ export default {
   externalAuthProviders: `${API_HOST}/login/getOauth2Clients`,
   tryExternalAuth: `${API_HOST}/login/externalLogin`,
   login: `${API_HOST}/login`,
+  loginSsoTicket: `${API_HOST}/login/sso-ticket`,
   group: `${API_HOST}/groups`,
   user: `${API_HOST}/users`,
   changepwd: `${API_HOST}/changepwd`,

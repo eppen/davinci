@@ -90,6 +90,10 @@ export const GET_USER_BY_TOKEN = 'davinci/GET_USER_BY_TOKEN'
 export const GET_USER_BY_TOKEN_SUCCESS = 'davinci/GET_USER_BY_TOKEN_SUCCESS'
 export const GET_USER_BY_TOKEN_FAIL = 'davinci/GET_USER_BY_TOKEN_FAIL'
 
+export const EOS_SSO_LOGIN = 'davinci/App/EOS_SSO_LOGIN'
+export const EOS_SSO_LOGIN_SUCCESS = 'davinci/App/EOS_SSO_LOGIN_SUCCESS'
+export const EOS_SSO_LOGIN_FAIL = 'davinci/App/EOS_SSO_LOGIN_FAIL'
+
 
 export enum DownloadTypes {
   Folder = 'folder',

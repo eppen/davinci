@@ -20,6 +20,7 @@
 package edp.davinci.controller;
 
 import edp.core.annotation.AuthIgnore;
+import edp.core.exception.ServerException;
 import edp.core.utils.TokenUtils;
 import edp.davinci.core.common.Constants;
 import edp.davinci.core.common.ResultMap;
@@ -141,5 +142,24 @@ public class LoginController {
             return ResponseEntity.ok(new ResultMap().success(token).payload(userLoginResult));
         }
         return ResponseEntity.status(401).build();
+    }
+
+    @ApiOperation(value = "Login via EOS integration gateway SSO ticket")
+    @AuthIgnore
+    @PostMapping(value = "sso-ticket", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity ssoTicketLogin(@RequestParam("ticket") String ticket) {
+        if (com.alibaba.druid.util.StringUtils.isEmpty(ticket)) {
+            ResultMap resultMap = new ResultMap().fail().message("SSO ticket is required");
+            return ResponseEntity.status(resultMap.getCode()).body(resultMap);
+        }
+        try {
+            UserLoginResult userLoginResult = userService.ssoTicketLogin(ticket);
+            User user = userService.getByUsernameExact(userLoginResult.getUsername());
+            return ResponseEntity.ok(new ResultMap().success(tokenUtils.generateToken(user)).payload(userLoginResult));
+        } catch (ServerException e) {
+            log.warn("SSO ticket login failed: {}", e.getMessage());
+            ResultMap resultMap = new ResultMap().fail().message(e.getMessage());
+            return ResponseEntity.status(resultMap.getCode()).body(resultMap);
+        }
     }
 }

@@ -42,7 +42,8 @@ import {
   TRY_EXTERNAL_AUTH,
   GET_CAPTCHA_FOR_RESET_PASSWORD,
   RESET_PASSWORD_UNLOGGED,
-  GET_USER_BY_TOKEN
+  GET_USER_BY_TOKEN,
+  EOS_SSO_LOGIN
 } from './constants'
 import {
   loginError,
@@ -66,7 +67,10 @@ import {
   serverConfigurationsGetted,
   getServerConfigurationsFail,
   getUserByTokenFail,
-  getUserByTokenSuccess
+  getUserByTokenSuccess,
+  eosSsoLoginSuccess,
+  eosSsoLoginFail,
+  logged
 } from './actions'
 import request, {
   removeToken,
@@ -404,6 +408,32 @@ export function* getUserByToken(action) {
   }
 }
 
+export function* eosSsoLogin(action) {
+  const { ticket, resolve, reject } = action.payload
+  try {
+    const asyncData = yield call(request, {
+      method: 'post',
+      url: `${api.loginSsoTicket}?ticket=${encodeURIComponent(ticket)}`
+    })
+    const loginUser = asyncData.payload
+    localStorage.setItem('loginUser', JSON.stringify(loginUser))
+    if (localStorage.getItem('embedded') === '1') {
+      // keep embedded flag for layout
+    }
+    yield put(eosSsoLoginSuccess(loginUser))
+    yield put(logged(loginUser))
+    if (resolve) {
+      resolve(loginUser)
+    }
+  } catch (err) {
+    yield put(eosSsoLoginFail(err))
+    errorHandler(err)
+    if (reject) {
+      reject(err)
+    }
+  }
+}
+
 export default function* rootGroupSaga() {
   yield all([
     throttle(1000, CHECK_NAME, checkNameUnique),
@@ -420,6 +450,7 @@ export default function* rootGroupSaga() {
     ),
     takeEvery(RESET_PASSWORD_UNLOGGED, resetPasswordUnlogged  as any),
     takeEvery(GET_USER_BY_TOKEN, getUserByToken),
+    takeEvery(EOS_SSO_LOGIN, eosSsoLogin),
     takeEvery(JOIN_ORGANIZATION, joinOrganization),
     takeLatest(LOAD_DOWNLOAD_LIST, getDownloadList),
     takeLatest(DOWNLOAD_FILE, downloadFile),

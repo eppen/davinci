@@ -37,6 +37,9 @@ public class UserLoginResult extends UserBaseInfo {
 
     private boolean statisticOpen = false;
 
+    /** Post-SSO landing path from integration gateway (e.g. /#/projects). */
+    private String gotoPath;
+
     public UserLoginResult(User user) {
         this.id = user.getId();
         this.username = user.getUsername();

@@ -26,7 +26,7 @@ import { Route, HashRouter as Router, Switch, Redirect } from 'react-router-dom'
 import { RouteComponentWithParams } from 'utils/types'
 
 import { compose } from 'redux'
-import { logged, logout, getServerConfigurations, getUserByToken } from './actions'
+import { logged, logout, getServerConfigurations, eosSsoLogin } from './actions'
 import injectReducer from 'utils/injectReducer'
 import reducer from './reducer'
 import injectSaga from 'utils/injectSaga'
@@ -36,6 +36,8 @@ import { makeSelectLogged } from './selectors'
 
 import checkLogin from 'utils/checkLogin'
 import { setToken } from 'utils/request'
+import { parseSearchParams, stripSsoQueryFromUrl, navigateAfterSso } from 'utils/eosSso'
+import { message } from 'antd'
 import { statistic } from 'utils/statistic/statistic.dv'
 import FindPassword from 'containers/FindPassword'
 
@@ -55,47 +57,33 @@ export class App extends React.PureComponent<AppProps> {
     this.checkTokenLink()
   }
 
-  private getQs = () => {
-    const search = location.search
-    const qs = search ? search.substr(1) : ''
-    if (qs) {
-      return qs
-        .split('&')
-        .reduce((rdc, val) => {
-          const pair = val.split('=')
-          rdc[pair[0]] = pair[1]
-          return rdc
-        }, {})
-    } else {
-      return false
-    }
-  }
-
   private checkTokenLink = () => {
-    const {
-      history,
-      onGetLoginUser
-    } = this.props
+    const { history, onEosSsoLogin } = this.props
+    const qs = parseSearchParams()
+    const ssoTicket = qs.ssoTicket || qs.usertoken
 
-    const qs = this.getQs()
-    const token = qs['usertoken']
-    // TODO allow take other parameters
-    // const dashboard = qs['dashboard']
+    if (qs.embedded === '1') {
+      localStorage.setItem('embedded', '1')
+    }
 
-    // @FIXME login with token from url query
-    // if (token) {
-    //   setToken(token)
-    //   // onGetLoginUser(() => {
-    //     history.replace('/projects')
-    //     // if (dashboard) {
-    //     //   router.replace(`/project/${this.props.params.projectId}/dashboard/${dashboard}`)
-    //     // } else {
+    if (ssoTicket) {
+      onEosSsoLogin(
+        ssoTicket,
+        (loginUser) => {
+          stripSsoQueryFromUrl()
+          const goto = loginUser.gotoPath || qs.goto
+          navigateAfterSso(goto, history)
+          statistic.sendPrevDurationRecord()
+        },
+        () => {
+          message.error('EOS 免登录失败，请联系管理员')
+          this.props.onLogout()
+        }
+      )
+      return
+    }
 
-    //     // }
-    //   // })
-    // } else {
     this.checkNormalLogin()
-    // }
   }
 
   private checkNormalLogin = () => {
@@ -162,7 +150,7 @@ const mapStateToProps = createStructuredSelector({
 const mapDispatchToProps = (dispatch) => ({
   onLogged: (user) => dispatch(logged(user)),
   onLogout: () => dispatch(logout()),
-  onGetLoginUser: (token: string) => dispatch(getUserByToken(token)),
+  onEosSsoLogin: (ticket, resolve, reject) => dispatch(eosSsoLogin(ticket, resolve, reject)),
   onGetServerConfigurations: () => dispatch(getServerConfigurations())
 })
 

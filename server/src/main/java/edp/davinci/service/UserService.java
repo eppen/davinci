@@ -27,6 +27,7 @@ import edp.davinci.core.service.CheckEntityService;
 import edp.davinci.dto.userDto.UserBaseInfo;
 import edp.davinci.dto.userDto.UserDistinctTicket;
 import edp.davinci.dto.userDto.UserLogin;
+import edp.davinci.dto.userDto.UserLoginResult;
 import edp.davinci.dto.userDto.UserRegist;
 import edp.davinci.model.User;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -39,7 +40,11 @@ public interface UserService extends CheckEntityService {
 
     User getByUsername(String username);
 
+    User getByUsernameExact(String username);
+
     User userLogin(UserLogin userLogin) throws ServerException;
+
+    UserLoginResult ssoTicketLogin(String ticket) throws ServerException;
 
     List<UserBaseInfo> getUsersByKeyword(String keyword, User user, Long orgId, Boolean includeSelf);
 

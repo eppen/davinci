@@ -59,7 +59,10 @@ import {
   RESET_PASSWORD_UNLOGGED_SUCCESS,
   GET_USER_BY_TOKEN,
   GET_USER_BY_TOKEN_SUCCESS,
-  GET_USER_BY_TOKEN_FAIL
+  GET_USER_BY_TOKEN_FAIL,
+  EOS_SSO_LOGIN,
+  EOS_SSO_LOGIN_SUCCESS,
+  EOS_SSO_LOGIN_FAIL
 } from './constants'
 
 import {
@@ -430,6 +433,35 @@ export function getUserByTokenSuccess(user) {
 export function getUserByTokenFail(error) {
   return {
     type: GET_USER_BY_TOKEN_FAIL,
+    payload: {
+      error
+    }
+  }
+}
+
+export function eosSsoLogin(ticket, resolve, reject) {
+  return {
+    type: EOS_SSO_LOGIN,
+    payload: {
+      ticket,
+      resolve,
+      reject
+    }
+  }
+}
+
+export function eosSsoLoginSuccess(user) {
+  return {
+    type: EOS_SSO_LOGIN_SUCCESS,
+    payload: {
+      user
+    }
+  }
+}
+
+export function eosSsoLoginFail(error) {
+  return {
+    type: EOS_SSO_LOGIN_FAIL,
     payload: {
       error
     }

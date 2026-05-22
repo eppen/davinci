@@ -47,6 +47,8 @@ import edp.davinci.model.RelUserOrganization;
 import edp.davinci.model.User;
 import edp.davinci.service.LdapService;
 import edp.davinci.service.UserService;
+import edp.davinci.service.eos.SsoTicketService;
+import edp.davinci.service.eos.SsoTicketService.TicketClaims;
 import lombok.extern.slf4j.Slf4j;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.BeanUtils;
@@ -94,6 +96,9 @@ public class UserServiceImpl extends BaseEntityService implements UserService {
 
     @Autowired
     private Environment environment;
+
+    @Autowired
+    private SsoTicketService ssoTicketService;
 
     private static final CheckEntityEnum entity = CheckEntityEnum.USER;
 
@@ -219,12 +224,38 @@ public class UserServiceImpl extends BaseEntityService implements UserService {
         return userMapper.selectByUsername(username);
     }
 
+    @Override
+    public User getByUsernameExact(String username) {
+        return userMapper.getByUsernameExact(username);
+    }
+
     /**
      * 用户登录
      *
      * @param userLogin
      * @return
      */
+    @Override
+    public UserLoginResult ssoTicketLogin(String ticket) throws ServerException {
+        TicketClaims claims = ssoTicketService.parseAndValidate(ticket);
+        User user = userMapper.getByUsernameExact(claims.getUsername());
+        if (user == null) {
+            log.warn("EOS SSO user not found in Davinci, username:{}", claims.getUsername());
+            throw new ServerException("User not found in Davinci");
+        }
+        if (!user.getActive()) {
+            log.warn("EOS SSO user not active, username:{}", claims.getUsername());
+            throw new ServerException("User is not active");
+        }
+        UserLoginResult result = new UserLoginResult(user);
+        String statistic_open = environment.getProperty("statistic.enable");
+        if ("true".equalsIgnoreCase(statistic_open)) {
+            result.setStatisticOpen(true);
+        }
+        result.setGotoPath(claims.getGotoPath());
+        return result;
+    }
+
     @Override
     public User userLogin(UserLogin userLogin) throws ServerException {
 

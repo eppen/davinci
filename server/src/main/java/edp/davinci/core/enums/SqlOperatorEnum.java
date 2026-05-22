@@ -19,7 +19,6 @@
 
 package edp.davinci.core.enums;
 
-import com.sun.tools.javac.util.ListBuffer;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.operators.relational.*;
 
@@ -62,7 +61,7 @@ public enum SqlOperatorEnum {
         return null;
     }
 
-    public static ExpressionVisitorAdapter getVisitor(ListBuffer<Map<SqlOperatorEnum, List<String>>> listBuffer) {
+    public static ExpressionVisitorAdapter getVisitor(List<Map<SqlOperatorEnum, List<String>>> operatorList) {
         Map<SqlOperatorEnum, List<String>> map = new HashMap<>();
         List<String> list = new ArrayList<>();
         return new ExpressionVisitorAdapter() {
@@ -82,7 +81,7 @@ public enum SqlOperatorEnum {
                     map.put(SqlOperatorEnum.IN, list);
                 }
 
-                listBuffer.append(map);
+                operatorList.add(map);
             }
 
             @Override
@@ -96,7 +95,7 @@ public enum SqlOperatorEnum {
 
                 map.put(SqlOperatorEnum.EQUALSTO, list);
 
-                listBuffer.append(map);
+                operatorList.add(map);
             }
 
             @Override
@@ -110,7 +109,7 @@ public enum SqlOperatorEnum {
 
                 map.put(SqlOperatorEnum.NOTEQUALSTO, list);
 
-                listBuffer.append(map);
+                operatorList.add(map);
             }
 
             @Override
@@ -124,7 +123,7 @@ public enum SqlOperatorEnum {
 
                 map.put(SqlOperatorEnum.BETWEEN, list);
 
-                listBuffer.append(map);
+                operatorList.add(map);
             }
 
             @Override
@@ -138,7 +137,7 @@ public enum SqlOperatorEnum {
 
                 map.put(SqlOperatorEnum.GREATERTHAN, list);
 
-                listBuffer.append(map);
+                operatorList.add(map);
             }
 
             @Override
@@ -152,7 +151,7 @@ public enum SqlOperatorEnum {
 
                 map.put(SqlOperatorEnum.GREATERTHANEQUALS, list);
 
-                listBuffer.append(map);
+                operatorList.add(map);
             }
 
             @Override
@@ -166,7 +165,7 @@ public enum SqlOperatorEnum {
 
                 map.put(SqlOperatorEnum.MINORTHAN, list);
 
-                listBuffer.append(map);
+                operatorList.add(map);
             }
 
             @Override
@@ -180,7 +179,7 @@ public enum SqlOperatorEnum {
 
                 map.put(SqlOperatorEnum.MINORTHANEQUALS, list);
 
-                listBuffer.append(map);
+                operatorList.add(map);
             }
 
             @Override
@@ -193,7 +192,7 @@ public enum SqlOperatorEnum {
 
                 map.put(SqlOperatorEnum.ISNULL, list);
 
-                listBuffer.append(map);
+                operatorList.add(map);
             }
 
             @Override
@@ -207,7 +206,7 @@ public enum SqlOperatorEnum {
 
                 map.put(SqlOperatorEnum.LIKE, list);
 
-                listBuffer.append(map);
+                operatorList.add(map);
             }
 
             @Override
@@ -220,7 +219,7 @@ public enum SqlOperatorEnum {
 
                 map.put(SqlOperatorEnum.EXISTS, list);
 
-                listBuffer.append(map);
+                operatorList.add(map);
             }
 
         };

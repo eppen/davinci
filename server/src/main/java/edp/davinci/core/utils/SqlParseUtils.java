@@ -20,7 +20,6 @@
 package edp.davinci.core.utils;
 
 import com.alibaba.druid.util.StringUtils;
-import com.sun.tools.javac.util.ListBuffer;
 import edp.core.exception.ServerException;
 import edp.core.utils.CollectionUtils;
 import edp.core.utils.SqlUtils;
@@ -362,9 +361,9 @@ public class SqlParseUtils {
         PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
         Expression where = plainSelect.getWhere();
 
-        ListBuffer<Map<SqlOperatorEnum, List<String>>> listBuffer = new ListBuffer<>();
-        where.accept(SqlOperatorEnum.getVisitor(listBuffer));
-        Map<SqlOperatorEnum, List<String>> operatorMap = listBuffer.toList().head;
+        List<Map<SqlOperatorEnum, List<String>>> operatorList = new ArrayList<>();
+        where.accept(SqlOperatorEnum.getVisitor(operatorList));
+        Map<SqlOperatorEnum, List<String>> operatorMap = operatorList.get(0);
 
         String delimiter = String.valueOf(sqlTempDelimiter);
 

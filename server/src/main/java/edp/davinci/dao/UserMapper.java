@@ -52,6 +52,10 @@ public interface UserMapper {
 
     User selectByUsername(@Param("username") String username);
 
+    @Select(value = {"select * from `user` where `username` = #{username}"}, databaseId = "mysql")
+    @Select(value = {"select * from [user] where [username] = #{username}"}, databaseId = "sqlserver")
+    User getByUsernameExact(@Param("username") String username);
+
     @Select(value = {"select * from `user` where `email` = #{email}"}, databaseId = "mysql")
 
     @Select(value = {"select * from [user] where [email] = #{email}"}, databaseId = "sqlserver")
