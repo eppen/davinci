@@ -5,6 +5,7 @@ import { Tag, Icon, Popconfirm, Tooltip } from 'antd'
 import ComponentPermission from 'containers/Account/components/checkMemberPermission'
 import Star from 'components/StarPanel/Star'
 import { IProject, IStarUser } from 'containers/Projects/types'
+import { getVizBackgroundUrl } from 'utils/vizBackground'
 
 
 interface IProjectItemProps {
@@ -104,7 +105,7 @@ export class ProjectItem extends React.PureComponent<IProjectItemProps, IPropsSt
       <div className={styles.projectItemWrap} onClick={this.props.toProject(pro.id)}>
         <div
           className={styles.avatarWrapper}
-          style={{backgroundImage: `url(${require(`assets/images/bg${pro.pic}.png`)})`}}
+          style={{backgroundImage: `url(${getVizBackgroundUrl(pro.pic)})`}}
         />
         <div className={styles.detailWrapper}>
           <div className={styles.titleWrapper} style={{ flex: 1 }}>

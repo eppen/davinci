@@ -14,6 +14,7 @@ import { IProject } from 'containers/Projects/types'
 import { IPortal } from 'containers/Viz/types'
 import { makeSelectProjectRoles } from 'containers/Projects/selectors'
 import {IProjectRoles} from 'containers/Organizations/component/ProjectRole'
+import { getVizBackgroundUrl } from 'utils/vizBackground'
 
 interface IPortalListProps {
   projectId: number
@@ -203,7 +204,7 @@ export class PortalList extends React.Component<IPortalListProps, IPortalListSta
       >
         <div
           className={itemClass}
-          style={{ backgroundImage: `url(${require(`assets/images/bg${portal.avatar}.png`)}` }}
+          style={{ backgroundImage: `url(${getVizBackgroundUrl(portal.avatar)})` }}
         >
           <header>
             <h3 className={styles.title}>

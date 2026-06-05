@@ -58,6 +58,7 @@ import ComponentPermission from '../Account/components/checkMemberPermission'
 import Star from 'components/StarPanel/Star'
 const StarUserModal = Star.StarUser
 import HistoryStack from '../Organizations/component/historyStack'
+import { getVizBackgroundUrl } from 'utils/vizBackground'
 const historyStack = new HistoryStack()
 import { RouteComponentWithParams } from 'utils/types'
 import {
@@ -595,7 +596,7 @@ const Projects: React.FC<
                   onClick={toProject}
                   description={description}
                   key={`projectItem${uuid}`}
-                  backgroundImg={`url(${require(`assets/images/bg${pic}.png`)})`}
+                  backgroundImg={`url(${getVizBackgroundUrl(pic)})`}
                 >
                   <div className={styles.others}>
                     {!isHistoryType ? Edit : ''}
