@@ -40,7 +40,7 @@ CHART_BAR = {
             "border": {"color": "#000", "width": 0, "type": "solid", "radius": 0},
             "gap": 30,
             "width": None,
-            "stack": {"stackGroup": []},
+            "stack": {"on": False, "percentage": False, "group": [], "sum": {"show": False, "font": {}}},
         },
         "label": {
             "showLabel": False,
@@ -206,6 +206,10 @@ def metric(name: str, chart: dict, agg: str = "sum") -> dict:
     }
 
 
+def empty_data_param(title: str, param_type: str) -> dict:
+    return {"title": title, "type": param_type, "items": []}
+
+
 def base_widget_config(model: dict, chart_styles: dict, selected_chart: int, cols: list, metrics: list) -> dict:
     return {
         "controls": [],
@@ -219,6 +223,9 @@ def base_widget_config(model: dict, chart_styles: dict, selected_chart: int, col
         "rows": [],
         "metrics": metrics,
         "filters": [],
+        "color": empty_data_param("颜色", "category"),
+        "label": empty_data_param("标签", "category"),
+        "tip": empty_data_param("提示信息", "value"),
         "chartStyles": chart_styles,
         "selectedChart": selected_chart,
         "orders": [],
