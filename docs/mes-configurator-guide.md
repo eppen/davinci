@@ -57,6 +57,73 @@ Source（数据源）→ View（字段模型）→ Widget（图表配置）→ M
 - View 变量名与 MES `params` 键一致（如 `plant`、`line`、`shift`）
 - 预览数据走 MES Dataset API，不经 SQL 引擎
 
+## Dashboard URL 与 MES 发布说明
+
+> 常见问题：`http://localhost:5002/#/project/1/portal/2/dashboard/2` 是不是发布到 MES 的 URL？
+
+**不完全是。** 该 URL 是 Davinci 内部打开某个 Dashboard 的地址，**不是** MES 集成的标准「发布 URL」。
+
+### URL 含义
+
+前端路由为 `/project/:projectId/portal/:portalId/dashboard/:dashboardId`，例如：
+
+```text
+http://localhost:5002/#/project/1/portal/2/dashboard/2
+```
+
+| 段 | 含义 |
+|----|------|
+| `project/1` | 项目 ID |
+| `portal/2` | Dashboard Portal（门户）ID |
+| `dashboard/2` | Dashboard ID |
+
+`5002` 为本地前端开发端口，**仅用于本机验证**；MES 生产环境应替换为实际部署的 Davinci 域名。
+
+### 「发布」在 Davinci 里指什么
+
+发布开关在 **Portal（门户）** 上，不在 Dashboard 上：
+
+- 编辑 Portal 时勾选「发布」→ `dashboard_portal.publish = 1`
+- 未发布时，只有具备写权限的配置师可见；只读用户不可见
+
+整页验证脚本 `bin/test-mysql/setup_davinci_mes_dashboard.py` 也会将 Portal 设为 `publish = 1`。使用前请确认对应 Portal 已发布。
+
+### MES 集成应如何使用
+
+| 场景 | 正确做法 |
+|------|----------|
+| **配置师在 Davinci 内整页验证** | 使用上述 `#/project/.../portal/.../dashboard/...` URL（生产环境换域名） |
+| **MES 一线看板（正式集成）** | 使用 `widgetId` + `@mes/chart-runtime` SDK，**不是**整页 Dashboard URL |
+| **MES 自研页面布局** | MES 自行排布，引用多个 Widget |
+
+Phase 1 分工：Dashboard 仅作内部验证；生产环境由 MES 自研布局，通过 `widgetId` 挂载（见 [集成路线图](./mes-chart-integration-roadmap.md) 模块 6、7）。
+
+### 若 MES 需 iframe 嵌入整页 Dashboard
+
+不推荐直接使用 `#/project/...`（需 Davinci 登录），常见两种方式：
+
+**1. 分享链接（免登录）**
+
+```text
+http://{davinci-host}/share.html?shareToken={token}#share/dashboard
+```
+
+在 Dashboard 页面点击「分享」生成。
+
+**2. SSO 跳转（MES 菜单带登录）**
+
+```text
+http://{gateway}/sso/launch?token={EOS_TOKEN}&app=davinci&redirect=%2F%23%2Fproject%2F1%2Fportal%2F2%2Fdashboard%2F2&embedded=1
+```
+
+`redirect` 为 URL 编码后的 hash 路径，详见 [EOS SSO](./eos-sso-integration.md)。
+
+### 结论
+
+- **本地验证**：URL 路径正确；`localhost:5002` 仅开发用；须确保 Portal 已发布。
+- **MES 正式对接**：不是该 URL，而是各 Widget 的 `widgetId`（Phase 2 SDK）或分享 / SSO 嵌入整页。
+- **临时整页嵌入 MES**：用分享链接或 SSO redirect，勿用需单独登录的 `#/project/...` 直连。
+
 ## 相关文档
 
 - [集成路线图](./mes-chart-integration-roadmap.md)
