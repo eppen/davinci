@@ -22,7 +22,8 @@ package edp.davinci.core.enums;
 public enum SourceTypeEnum {
 
     JDBC("jdbc"),
-    CSV("csv");
+    CSV("csv"),
+    MES_API("mes_api");
 
     private String type;
 

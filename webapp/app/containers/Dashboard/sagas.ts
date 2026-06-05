@@ -45,6 +45,7 @@ import { makeSelectFormedViews } from '../View/selectors'
 import {
   getRequestParams,
   getRequestBody,
+  combineFilters,
   getCurrentControlValues,
   getUpdatedPagination,
   getInitialPagination
@@ -600,7 +601,6 @@ export function* getWidgetCsv(action: DashboardActionType) {
   }
   const { widgetCsvLoaded, loadWidgetCsvFail } = DashboardActions
   const { itemId, widgetId, requestParams } = action.payload
-  // @TODO combine widget static filters with local filters
   const {
     filters,
     tempFilters,
@@ -618,10 +618,7 @@ export function* getWidgetCsv(action: DashboardActionType) {
       url: `${api.widget}/${widgetId}/excel`,
       data: {
         ...rest,
-        filters: filters
-          .concat(tempFilters)
-          .concat(linkageFilters)
-          .concat(globalFilters),
+        filters: combineFilters(filters, tempFilters, linkageFilters, globalFilters),
         params: variables.concat(linkageVariables).concat(globalVariables)
       }
     })

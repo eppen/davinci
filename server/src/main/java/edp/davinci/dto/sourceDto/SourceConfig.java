@@ -45,6 +45,13 @@ public class SourceConfig {
 
     private boolean isExt;
 
+    /** MES_API */
+    private String datasetCode;
+    private String authType;
+    private String bearerToken;
+    private Integer timeoutMs;
+    private String baseUrl;
+
     public SourceConfig() {
 
     }

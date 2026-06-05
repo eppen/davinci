@@ -1,6 +1,6 @@
 import React from 'react'
 import { IChartProps } from './index'
-import chartlibs from '../../config/chart'
+import { getChartLibs } from 'utils/chartRegistry'
 import echarts from 'echarts/lib/echarts'
 import { ECharts } from 'echarts'
 import chartOptionGenerator from '../../render/chart'
@@ -59,7 +59,7 @@ export class Chart extends React.PureComponent<IChartProps, IChartStates> {
 
       this.instance.setOption(
         chartOptionGenerator(
-          chartlibs.find((cl) => cl.id === selectedChart).name,
+          getChartLibs().find((cl) => cl.id === selectedChart).name,
           props,
           {
             instance: this.instance,

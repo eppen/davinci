@@ -24,10 +24,11 @@ export function parseSearchParams (): Record<string, string> {
 
 export function stripSsoQueryFromUrl (): void {
   const params = parseSearchParams()
-  if (!params.ssoTicket && !params.goto && params.embedded === undefined) {
+  if (!params.ssoTicket && !params.mesToken && !params.goto && params.embedded === undefined) {
     return
   }
   delete params.ssoTicket
+  delete params.mesToken
   delete params.goto
   delete params.embedded
   const keys = Object.keys(params)

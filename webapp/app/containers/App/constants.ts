@@ -94,6 +94,10 @@ export const EOS_SSO_LOGIN = 'davinci/App/EOS_SSO_LOGIN'
 export const EOS_SSO_LOGIN_SUCCESS = 'davinci/App/EOS_SSO_LOGIN_SUCCESS'
 export const EOS_SSO_LOGIN_FAIL = 'davinci/App/EOS_SSO_LOGIN_FAIL'
 
+export const MES_TOKEN_LOGIN = 'davinci/App/MES_TOKEN_LOGIN'
+export const MES_TOKEN_LOGIN_SUCCESS = 'davinci/App/MES_TOKEN_LOGIN_SUCCESS'
+export const MES_TOKEN_LOGIN_FAIL = 'davinci/App/MES_TOKEN_LOGIN_FAIL'
+
 
 export enum DownloadTypes {
   Folder = 'folder',

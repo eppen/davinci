@@ -8,6 +8,7 @@ import {
 import { ActionTypes as DashboardActionTypes } from 'containers/Dashboard/constants'
 import { IDataDownloadStatistic } from 'app/containers/Dashboard/types'
 import {uuid} from 'utils/util'
+import { combineFilters } from 'app/containers/Dashboard/util'
 
 interface IDownloadFields {
   action: 'download'
@@ -88,17 +89,8 @@ function getWidgetDetailFieldsByOthers (action) {
     const { groups, filters, variables, tempFilters, linkageFilters, tempVariables,
       globalVariables, linkageVariables,  globalFilters, widget: {id, name}} = action.statistic
 
-    let bootstrapFilters = [...filters]
+    const bootstrapFilters = combineFilters(filters, tempFilters, linkageFilters, globalFilters)
     let bootstrapVariables = [...variables]
-    if (tempFilters && tempFilters.length) {
-      bootstrapFilters = filters.concat(tempFilters)
-    }
-    if (linkageFilters && linkageFilters.length) {
-      bootstrapFilters = bootstrapFilters.concat(linkageFilters)
-    }
-    if (globalFilters && globalFilters.length) {
-      bootstrapFilters = bootstrapFilters.concat(globalFilters)
-    }
 
     // 全局 组件 联动  变量
     if (linkageVariables && linkageVariables.length) {

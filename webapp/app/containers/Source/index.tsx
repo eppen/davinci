@@ -225,6 +225,10 @@ export class SourceList extends React.PureComponent<
           {
             text: 'CSV',
             value: 'csv'
+          },
+          {
+            text: 'MES API',
+            value: 'mes_api'
           }
         ],
         filterMultiple: false,

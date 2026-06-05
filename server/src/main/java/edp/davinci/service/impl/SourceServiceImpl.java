@@ -51,6 +51,7 @@ import edp.davinci.model.View;
 import edp.davinci.runner.LoadSupportDataSourceRunner;
 import edp.davinci.service.ProjectService;
 import edp.davinci.service.SourceService;
+import edp.davinci.service.mes.MesDatasetClient;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,6 +95,9 @@ public class SourceServiceImpl extends BaseEntityService implements SourceServic
 
     @Autowired
     private JdbcDataSource jdbcDataSource;
+
+    @Autowired
+    private MesDatasetClient mesDatasetClient;
 
     @Autowired
     private RedisUtils redisUtils;
@@ -205,16 +209,24 @@ public class SourceServiceImpl extends BaseEntityService implements SourceServic
             SourceConfig config = sourceCreate.getConfig();
 
             // 测试连接
-            if (!testConnection(config)) {
+            if (SourceTypeEnum.MES_API.getType().equals(sourceCreate.getType())) {
+                JSONObject mesConfig = buildMesApiConfig(config);
+                if (!mesDatasetClient.testConnection(mesConfig)) {
+                    throw new ServerException("Test MES API connection fail");
+                }
+            } else if (!testConnection(config)) {
                 throw new ServerException("Test source connection fail");
             }
 
             Source source = new Source().createdBy(user.getId());
             BeanUtils.copyProperties(sourceCreate, source);
-            // Decrypt the password in config
             JSONObject jsonObject = JSONObject.parseObject(JSONObject.toJSONString(config));
-            String encrypt = SourcePasswordEncryptUtils.encrypt((String) jsonObject.get("password"));
-            jsonObject.put("password", encrypt);
+            if (!SourceTypeEnum.MES_API.getType().equals(sourceCreate.getType())) {
+                String encrypt = SourcePasswordEncryptUtils.encrypt((String) jsonObject.get("password"));
+                jsonObject.put("password", encrypt);
+            } else {
+                jsonObject = buildMesApiConfig(config);
+            }
             source.setConfig(jsonObject.toString());
             if (sourceMapper.insert(source) != 1) {
                 log.info("Create source fail, source:{}", source.toString());
@@ -239,6 +251,29 @@ public class SourceServiceImpl extends BaseEntityService implements SourceServic
         }
 
         return source;
+    }
+
+    private JSONObject buildMesApiConfig(SourceConfig config) {
+        JSONObject jsonObject = JSONObject.parseObject(JSONObject.toJSONString(config));
+        String baseUrl = config.getBaseUrl();
+        if (!StringUtils.hasText(baseUrl)) {
+            baseUrl = config.getUrl();
+        }
+        jsonObject.put("url", baseUrl);
+        jsonObject.put("baseUrl", baseUrl);
+        if (StringUtils.hasText(config.getDatasetCode())) {
+            jsonObject.put("datasetCode", config.getDatasetCode());
+        }
+        if (StringUtils.hasText(config.getAuthType())) {
+            jsonObject.put("authType", config.getAuthType());
+        }
+        if (StringUtils.hasText(config.getBearerToken())) {
+            jsonObject.put("bearerToken", config.getBearerToken());
+        }
+        if (config.getTimeoutMs() != null) {
+            jsonObject.put("timeoutMs", config.getTimeoutMs());
+        }
+        return jsonObject;
     }
 
     private boolean testConnection(SourceConfig config) {
@@ -285,7 +320,12 @@ public class SourceServiceImpl extends BaseEntityService implements SourceServic
             SourceConfig config = sourceInfo.getConfig();
 
             // 测试连接
-            if (!testConnection(config)) {
+            if (SourceTypeEnum.MES_API.getType().equals(sourceInfo.getType())) {
+                JSONObject mesConfig = buildMesApiConfig(config);
+                if (!mesDatasetClient.testConnection(mesConfig)) {
+                    throw new ServerException("Test MES API connection fail");
+                }
+            } else if (!testConnection(config)) {
                 throw new ServerException("Test source connection fail");
             }
 
@@ -295,10 +335,13 @@ public class SourceServiceImpl extends BaseEntityService implements SourceServic
 
             BeanUtils.copyProperties(sourceInfo, source);
             source.updatedBy(user.getId());
-            // Decrypt the password in config
             JSONObject jsonObject = JSONObject.parseObject(JSONObject.toJSONString(sourceInfo.getConfig()));
-            String encrypt = SourcePasswordEncryptUtils.encrypt((String) jsonObject.get("password"));
-            jsonObject.put("password", encrypt);
+            if (!SourceTypeEnum.MES_API.getType().equals(sourceInfo.getType())) {
+                String encrypt = SourcePasswordEncryptUtils.encrypt((String) jsonObject.get("password"));
+                jsonObject.put("password", encrypt);
+            } else {
+                jsonObject = buildMesApiConfig(config);
+            }
             source.setConfig(jsonObject.toString());
             if (sourceMapper.update(source) != 1) {
                 log.info("Update source fail, source:{}", source.toString());

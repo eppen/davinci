@@ -162,4 +162,28 @@ public class LoginController {
             return ResponseEntity.status(resultMap.getCode()).body(resultMap);
         }
     }
+
+    @ApiOperation(value = "Login via MES JWT token")
+    @AuthIgnore
+    @PostMapping(value = "mes-token", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity mesTokenLogin(@RequestParam(value = "token", required = false) String tokenParam,
+                                        @RequestBody(required = false) java.util.Map<String, String> body) {
+        String token = tokenParam;
+        if (com.alibaba.druid.util.StringUtils.isEmpty(token) && body != null) {
+            token = body.get("token");
+        }
+        if (com.alibaba.druid.util.StringUtils.isEmpty(token)) {
+            ResultMap resultMap = new ResultMap().fail().message("MES token is required");
+            return ResponseEntity.status(resultMap.getCode()).body(resultMap);
+        }
+        try {
+            UserLoginResult userLoginResult = userService.mesTokenLogin(token);
+            User user = userService.getByUsernameExact(userLoginResult.getUsername());
+            return ResponseEntity.ok(new ResultMap().success(tokenUtils.generateToken(user)).payload(userLoginResult));
+        } catch (ServerException e) {
+            log.warn("MES token login failed: {}", e.getMessage());
+            ResultMap resultMap = new ResultMap().fail().message(e.getMessage());
+            return ResponseEntity.status(resultMap.getCode()).body(resultMap);
+        }
+    }
 }

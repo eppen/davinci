@@ -1,0 +1,22 @@
+# Phase 1 MES 集成配置示例（追加到 config/application.yml）
+
+auth:
+  sso:
+    mode: both   # eos-ticket | mes-jwt | both
+
+mes:
+  integration:
+    jwt-enabled: true
+    username-claim: username
+    # 生产环境配置 RSA 公钥验签；开发可留空（仅解析 payload）
+    public-key: |
+      -----BEGIN PUBLIC KEY-----
+      ...
+      -----END PUBLIC KEY-----
+    dataset-cache-seconds: 45
+
+eos:
+  integration:
+    enabled: true
+    ticket-secret: change-me-eos-ticket-secret
+    app-code: davinci

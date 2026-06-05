@@ -26,7 +26,7 @@ import { Route, HashRouter as Router, Switch, Redirect } from 'react-router-dom'
 import { RouteComponentWithParams } from 'utils/types'
 
 import { compose } from 'redux'
-import { logged, logout, getServerConfigurations, eosSsoLogin } from './actions'
+import { logged, logout, getServerConfigurations, eosSsoLogin, mesTokenLogin } from './actions'
 import injectReducer from 'utils/injectReducer'
 import reducer from './reducer'
 import injectSaga from 'utils/injectSaga'
@@ -37,6 +37,7 @@ import { makeSelectLogged } from './selectors'
 import checkLogin from 'utils/checkLogin'
 import { setToken } from 'utils/request'
 import { parseSearchParams, stripSsoQueryFromUrl, navigateAfterSso } from 'utils/eosSso'
+import { initChartRegistry } from 'utils/chartRegistry'
 import { message } from 'antd'
 import { statistic } from 'utils/statistic/statistic.dv'
 import FindPassword from 'containers/FindPassword'
@@ -54,16 +55,34 @@ export class App extends React.PureComponent<AppProps> {
   constructor (props: AppProps) {
     super(props)
     props.onGetServerConfigurations()
+    initChartRegistry()
     this.checkTokenLink()
   }
 
   private checkTokenLink = () => {
-    const { history, onEosSsoLogin } = this.props
+    const { history, onEosSsoLogin, onMesTokenLogin } = this.props
     const qs = parseSearchParams()
     const ssoTicket = qs.ssoTicket || qs.usertoken
+    const mesToken = qs.mesToken
 
     if (qs.embedded === '1') {
       localStorage.setItem('embedded', '1')
+    }
+
+    if (mesToken) {
+      onMesTokenLogin(
+        mesToken,
+        () => {
+          stripSsoQueryFromUrl()
+          navigateAfterSso(qs.goto, history)
+          statistic.sendPrevDurationRecord()
+        },
+        () => {
+          message.error('MES 免登录失败，请联系管理员')
+          this.props.onLogout()
+        }
+      )
+      return
     }
 
     if (ssoTicket) {
@@ -151,6 +170,7 @@ const mapDispatchToProps = (dispatch) => ({
   onLogged: (user) => dispatch(logged(user)),
   onLogout: () => dispatch(logout()),
   onEosSsoLogin: (ticket, resolve, reject) => dispatch(eosSsoLogin(ticket, resolve, reject)),
+  onMesTokenLogin: (token, resolve, reject) => dispatch(mesTokenLogin(token, resolve, reject)),
   onGetServerConfigurations: () => dispatch(getServerConfigurations())
 })
 

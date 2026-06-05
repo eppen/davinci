@@ -46,6 +46,8 @@ public interface UserService extends CheckEntityService {
 
     UserLoginResult ssoTicketLogin(String ticket) throws ServerException;
 
+    UserLoginResult mesTokenLogin(String token) throws ServerException;
+
     List<UserBaseInfo> getUsersByKeyword(String keyword, User user, Long orgId, Boolean includeSelf);
 
     boolean updateUser(User user) throws ServerException;

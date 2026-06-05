@@ -411,12 +411,29 @@ export function getRequestParams(
   }
 }
 
+export function combineFilters (
+  filters: string[] = [],
+  tempFilters: string[] = [],
+  linkageFilters: string[] = [],
+  globalFilters: string[] = [],
+  drillFilters?: string[]
+): string[] {
+  let combined = filters
+    .concat(tempFilters)
+    .concat(linkageFilters)
+    .concat(globalFilters)
+  if (drillFilters && drillFilters.length) {
+    combined = combined.concat(drillFilters)
+  }
+  return combined
+}
+
 export function getRequestBody(
   requestParams: IDataRequestParams
 ): IDataRequestBody {
   const {
     filters,
-    tempFilters, // @TODO combine widget static filters with local filters
+    tempFilters,
     linkageFilters,
     globalFilters,
     variables,
@@ -430,13 +447,13 @@ export function getRequestBody(
 
   const { pageSize, pageNo } = pagination || { pageSize: 0, pageNo: 0 }
 
-  let combinedFilters = filters
-    .concat(tempFilters)
-    .concat(linkageFilters)
-    .concat(globalFilters)
-  if (drillStatus && drillStatus.filters) {
-    combinedFilters = combinedFilters.concat(drillStatus.filters)
-  }
+  const combinedFilters = combineFilters(
+    filters,
+    tempFilters,
+    linkageFilters,
+    globalFilters,
+    drillStatus && drillStatus.filters
+  )
 
   return {
     ...omit(rest, 'customOrders'),

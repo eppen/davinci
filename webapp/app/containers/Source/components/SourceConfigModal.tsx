@@ -116,6 +116,7 @@ const SourceConfigModal: React.FC<ISourceConfigModalProps> = (props) => {
   const { id: sourceId } = source
   const { getFieldDecorator } = form
   const [sourceProperties, setSourceProperties] = useState<SourceProperty[]>([])
+  const [sourceType, setSourceType] = useState(source.type || 'jdbc')
 
   useEffect(
     () => {
@@ -129,10 +130,20 @@ const SourceConfigModal: React.FC<ISourceConfigModalProps> = (props) => {
       // @FIXME nested object properties name typing
       fieldsKeys = []
         .concat(fieldsKeys)
-        .concat(['config.username', 'config.password', 'config.url'])
+        .concat([
+          'config.username',
+          'config.password',
+          'config.url',
+          'config.datasetCode',
+          'config.authType',
+          'config.bearerToken',
+          'config.timeoutMs',
+          'config.baseUrl'
+        ])
 
       const fieldsValue = pick(source, fieldsKeys)
       form.setFieldsValue(fieldsValue)
+      setSourceType(source.type || 'jdbc')
     },
     [source, visible]
   )
@@ -307,48 +318,89 @@ const SourceConfigModal: React.FC<ISourceConfigModalProps> = (props) => {
               {getFieldDecorator<ISourceFormValues>('type', {
                 initialValue: 'jdbc'
               })(
-                <Select>
+                <Select onChange={(v: string) => setSourceType(v)}>
                   <Option value="jdbc">JDBC</Option>
                   <Option value="csv">CSV文件</Option>
+                  <Option value="mes_api">MES Dataset API</Option>
                 </Select>
               )}
             </FormItem>
           </Col>
-          <Col span={12}>
-            <FormItem label="数据库" {...commonFormItemStyle}>
-              {getFieldDecorator<ISourceFormValues>('datasourceInfo', {
-                initialValue: []
-              })(
-                <Cascader
-                  options={cascaderOptions}
-                  displayRender={datasourceInfoDisplayRender}
-                  onChange={datasourceInfoChange}
-                />
-              )}
-            </FormItem>
-          </Col>
-          <Col span={12}>
-            <FormItem label="用户名" {...commonFormItemStyle}>
-              {getFieldDecorator('config.username', {
-                initialValue: ''
-              })(<Input autoComplete="off" placeholder="User" />)}
-            </FormItem>
-          </Col>
-          <Col span={12}>
-            <FormItem label="密码" {...commonFormItemStyle}>
-              {getFieldDecorator('config.password', {
-                initialValue: ''
-              })(
-                <Input
-                  autoComplete="off"
-                  placeholder="Password"
-                  type="password"
-                />
-              )}
-            </FormItem>
-          </Col>
+          {sourceType !== 'mes_api' && (
+            <Col span={12}>
+              <FormItem label="数据库" {...commonFormItemStyle}>
+                {getFieldDecorator<ISourceFormValues>('datasourceInfo', {
+                  initialValue: []
+                })(
+                  <Cascader
+                    options={cascaderOptions}
+                    displayRender={datasourceInfoDisplayRender}
+                    onChange={datasourceInfoChange}
+                  />
+                )}
+              </FormItem>
+            </Col>
+          )}
+          {sourceType !== 'mes_api' && (
+            <Col span={12}>
+              <FormItem label="用户名" {...commonFormItemStyle}>
+                {getFieldDecorator('config.username', {
+                  initialValue: ''
+                })(<Input autoComplete="off" placeholder="User" />)}
+              </FormItem>
+            </Col>
+          )}
+          {sourceType !== 'mes_api' && (
+            <Col span={12}>
+              <FormItem label="密码" {...commonFormItemStyle}>
+                {getFieldDecorator('config.password', {
+                  initialValue: ''
+                })(
+                  <Input
+                    autoComplete="off"
+                    placeholder="Password"
+                    type="password"
+                  />
+                )}
+              </FormItem>
+            </Col>
+          )}
         </Row>
-        <FormItem label="连接Url" {...longFormItemStyle}>
+        {sourceType === 'mes_api' && (
+          <Row>
+            <Col span={12}>
+              <FormItem label="Dataset Code" {...commonFormItemStyle}>
+                {getFieldDecorator('config.datasetCode', {
+                  initialValue: 'output_shift'
+                })(<Input placeholder="output_shift" />)}
+              </FormItem>
+            </Col>
+            <Col span={12}>
+              <FormItem label="鉴权方式" {...commonFormItemStyle}>
+                {getFieldDecorator('config.authType', {
+                  initialValue: 'bearer'
+                })(
+                  <Select>
+                    <Option value="bearer">静态 Bearer Token</Option>
+                    <Option value="forward-mes-token">透传 MES Token</Option>
+                    <Option value="none">无</Option>
+                  </Select>
+                )}
+              </FormItem>
+            </Col>
+            <Col span={12}>
+              <FormItem label="Bearer Token" {...commonFormItemStyle}>
+                {getFieldDecorator('config.bearerToken', {
+                  initialValue: ''
+                })(<Input placeholder="可选" />)}
+              </FormItem>
+            </Col>
+          </Row>
+        )}
+        <FormItem
+          label={sourceType === 'mes_api' ? 'MES API Base URL' : '连接Url'}
+          {...longFormItemStyle}
+        >
           {getFieldDecorator('config.url', {
             rules: [
               {
@@ -356,7 +408,7 @@ const SourceConfigModal: React.FC<ISourceConfigModalProps> = (props) => {
                 message: 'Url 不能为空'
               }
             ],
-            initialValue: ''
+            initialValue: sourceType === 'mes_api' ? 'http://127.0.0.1:8080' : ''
           })(
             <Input
               placeholder="Connection Url"

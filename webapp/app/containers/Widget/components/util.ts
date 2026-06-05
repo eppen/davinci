@@ -26,10 +26,10 @@ import { IDataParamSource } from './Workbench/Dropbox'
 import { getFieldAlias } from '../components/Config/Field'
 import { getFormattedValue } from '../components/Config/Format'
 import widgetlibs from '../config'
+import { getChartLibs } from 'utils/chartRegistry'
 import PivotTypes from '../config/pivot/PivotTypes'
 import ChartTypes from '../config/chart/ChartTypes'
 const pivotlibs = widgetlibs['pivot']
-const chartlibs = widgetlibs['chart']
 import { uuid } from 'utils/util'
 
 export function getAggregatorLocale(agg) {
@@ -399,7 +399,7 @@ export function getPivot(): IChartInfo {
 }
 
 export function getTable(): IChartInfo {
-  return chartlibs.find((c) => c.id === ChartTypes.Table)
+  return getChartLibs().find((c) => c.id === ChartTypes.Table)
 }
 
 export function getPivotModeSelectedCharts(

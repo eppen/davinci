@@ -1,0 +1,134 @@
+openapi: 3.0.3
+info:
+  title: MES Dataset API
+  description: |
+    MES 向 Davinci Chart Service 提供标准数据集查询接口。
+    Davinci 通过 MES_API Source 消费，不在 Davinci 侧编写业务汇总 SQL。
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:9090
+    description: Davinci Mock Server（开发）
+  - url: https://mes.example.com
+    description: MES 生产环境
+
+paths:
+  /api/mes/dataset/{datasetCode}/query:
+    post:
+      summary: 查询数据集
+      operationId: queryDataset
+      tags:
+        - Dataset
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: datasetCode
+          in: path
+          required: true
+          schema:
+            type: string
+          example: output_shift
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatasetQueryRequest'
+            examples:
+              output_shift:
+                value:
+                  params:
+                    plant: P01
+                    line: L03
+                    shift: A
+                    date: "2026-06-05"
+                  pagination:
+                    pageNo: 1
+                    pageSize: 500
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetQueryResponse'
+        '401':
+          description: 未授权
+        '404':
+          description: 数据集不存在
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    DatasetQueryRequest:
+      type: object
+      properties:
+        params:
+          type: object
+          additionalProperties: true
+          description: 业务参数（plant/line/shift/date 等）
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+        - params
+
+    Pagination:
+      type: object
+      properties:
+        pageNo:
+          type: integer
+          minimum: 1
+          default: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          default: 500
+
+    DatasetColumn:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [string, number, date, boolean]
+        role:
+          type: string
+          enum: [dimension, metric]
+      required:
+        - name
+        - type
+
+    DatasetQueryResponse:
+      type: object
+      properties:
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatasetColumn'
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        meta:
+          $ref: '#/components/schemas/DatasetMeta'
+      required:
+        - columns
+        - rows
+
+    DatasetMeta:
+      type: object
+      properties:
+        totalCount:
+          type: integer
+        cached:
+          type: boolean
+        queryTimeMs:
+          type: integer

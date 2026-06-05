@@ -22,6 +22,7 @@ import { call, put, all, takeLatest, takeEvery } from 'redux-saga/effects'
 import { ActionTypes } from './constants'
 import { ViewActions, ViewActionType } from './actions'
 import omit from 'lodash/omit'
+import { combineFilters } from 'app/containers/Dashboard/util'
 
 import axios, { AxiosResponse, AxiosError, CancelTokenSource } from 'axios'
 import request, { IDavinciResponse } from 'utils/request'
@@ -285,10 +286,13 @@ export function* getViewDataFromVizItem (action: ViewActionType) {
   } = requestParams
   const { pageSize, pageNo } = pagination || { pageSize: 0, pageNo: 0 }
 
-  let searchFilters = filters.concat(tempFilters).concat(linkageFilters).concat(globalFilters)
-  if (drillStatus && drillStatus.filters) {
-    searchFilters = searchFilters.concat(drillStatus.filters)  // 改成 drillStatus.filters
-  }
+  const searchFilters = combineFilters(
+    filters,
+    tempFilters,
+    linkageFilters,
+    globalFilters,
+    drillStatus && drillStatus.filters
+  )
 
   try {
     const asyncData = yield call(request, {

@@ -49,6 +49,8 @@ import edp.davinci.service.LdapService;
 import edp.davinci.service.UserService;
 import edp.davinci.service.eos.SsoTicketService;
 import edp.davinci.service.eos.SsoTicketService.TicketClaims;
+import edp.davinci.service.mes.MesJwtTokenService;
+import edp.davinci.service.mes.MesJwtTokenService.MesTokenClaims;
 import lombok.extern.slf4j.Slf4j;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.BeanUtils;
@@ -99,6 +101,9 @@ public class UserServiceImpl extends BaseEntityService implements UserService {
 
     @Autowired
     private SsoTicketService ssoTicketService;
+
+    @Autowired
+    private MesJwtTokenService mesJwtTokenService;
 
     private static final CheckEntityEnum entity = CheckEntityEnum.USER;
 
@@ -253,6 +258,26 @@ public class UserServiceImpl extends BaseEntityService implements UserService {
             result.setStatisticOpen(true);
         }
         result.setGotoPath(claims.getGotoPath());
+        return result;
+    }
+
+    @Override
+    public UserLoginResult mesTokenLogin(String token) throws ServerException {
+        MesTokenClaims claims = mesJwtTokenService.parseAndValidate(token);
+        User user = userMapper.getByUsernameExact(claims.getUsername());
+        if (user == null) {
+            log.warn("MES JWT user not found in Davinci, username:{}", claims.getUsername());
+            throw new ServerException("User not found in Davinci");
+        }
+        if (!user.getActive()) {
+            log.warn("MES JWT user not active, username:{}", claims.getUsername());
+            throw new ServerException("User is not active");
+        }
+        UserLoginResult result = new UserLoginResult(user);
+        String statistic_open = environment.getProperty("statistic.enable");
+        if ("true".equalsIgnoreCase(statistic_open)) {
+            result.setStatisticOpen(true);
+        }
         return result;
     }
 

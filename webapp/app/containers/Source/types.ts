@@ -22,7 +22,7 @@ import { SqlTypes } from 'app/globalConstants'
 import { SourceProperty } from './components/types'
 export { SourceResetConnectionProperties } from './components/types'
 
-export type SourceType = 'csv' | 'jdbc'
+export type SourceType = 'csv' | 'jdbc' | 'mes_api'
 
 export interface ISourceSimple {
   id: number
@@ -47,6 +47,11 @@ export interface ISource extends ISourceBase {
     properties: SourceProperty[]
     ext?: boolean
     version?: string
+    datasetCode?: string
+    authType?: string
+    bearerToken?: string
+    timeoutMs?: number
+    baseUrl?: string
   }
 }
 
@@ -57,6 +62,11 @@ export interface ISourceFormValues extends ISourceBase {
     password: string
     url: string
     properties: SourceProperty[]
+    datasetCode?: string
+    authType?: string
+    bearerToken?: string
+    timeoutMs?: number
+    baseUrl?: string
   }
 }
 

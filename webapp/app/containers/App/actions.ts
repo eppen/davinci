@@ -62,7 +62,10 @@ import {
   GET_USER_BY_TOKEN_FAIL,
   EOS_SSO_LOGIN,
   EOS_SSO_LOGIN_SUCCESS,
-  EOS_SSO_LOGIN_FAIL
+  EOS_SSO_LOGIN_FAIL,
+  MES_TOKEN_LOGIN,
+  MES_TOKEN_LOGIN_SUCCESS,
+  MES_TOKEN_LOGIN_FAIL
 } from './constants'
 
 import {
@@ -462,6 +465,35 @@ export function eosSsoLoginSuccess(user) {
 export function eosSsoLoginFail(error) {
   return {
     type: EOS_SSO_LOGIN_FAIL,
+    payload: {
+      error
+    }
+  }
+}
+
+export function mesTokenLogin(token, resolve, reject) {
+  return {
+    type: MES_TOKEN_LOGIN,
+    payload: {
+      token,
+      resolve,
+      reject
+    }
+  }
+}
+
+export function mesTokenLoginSuccess(user) {
+  return {
+    type: MES_TOKEN_LOGIN_SUCCESS,
+    payload: {
+      user
+    }
+  }
+}
+
+export function mesTokenLoginFail(error) {
+  return {
+    type: MES_TOKEN_LOGIN_FAIL,
     payload: {
       error
     }

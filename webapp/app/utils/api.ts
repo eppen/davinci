@@ -47,5 +47,7 @@ export default {
   star: `${API_HOST}/star`,
   download: `${API_HOST}/download`,
   buriedPoints: `${API_HOST}/statistic`,
-  configurations: `${API_HOST}/configurations`
+  configurations: `${API_HOST}/configurations`,
+  chartTypes: `${API_HOST}/chart-types`,
+  loginMesToken: `${API_HOST}/login/mes-token`
 }

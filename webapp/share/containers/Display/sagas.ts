@@ -19,6 +19,7 @@
  */
 
 import omit from 'lodash/omit'
+import { combineFilters } from 'app/containers/Dashboard/util'
 import { call, select, put, all, takeLatest, takeEvery } from 'redux-saga/effects'
 
 import { message } from 'antd'
@@ -118,7 +119,7 @@ export function* getData (action: ShareDisplayActionType) {
       url: `${api.share}/data/${dataToken}`,
       data: {
         ...omit(rest, 'customOrders'),
-        filters: filters.concat(tempFilters).concat(linkageFilters).concat(globalFilters),
+        filters: combineFilters(filters, tempFilters, linkageFilters, globalFilters),
         params: variables.concat(linkageVariables).concat(globalVariables),
         pageSize,
         pageNo

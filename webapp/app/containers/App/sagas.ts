@@ -43,7 +43,8 @@ import {
   GET_CAPTCHA_FOR_RESET_PASSWORD,
   RESET_PASSWORD_UNLOGGED,
   GET_USER_BY_TOKEN,
-  EOS_SSO_LOGIN
+  EOS_SSO_LOGIN,
+  MES_TOKEN_LOGIN
 } from './constants'
 import {
   loginError,
@@ -70,6 +71,8 @@ import {
   getUserByTokenSuccess,
   eosSsoLoginSuccess,
   eosSsoLoginFail,
+  mesTokenLoginSuccess,
+  mesTokenLoginFail,
   logged
 } from './actions'
 import request, {
@@ -434,6 +437,30 @@ export function* eosSsoLogin(action) {
   }
 }
 
+export function* mesTokenLogin(action) {
+  const { token, resolve, reject } = action.payload
+  try {
+    const asyncData = yield call(request, {
+      method: 'post',
+      url: api.loginMesToken,
+      data: { token }
+    })
+    const loginUser = asyncData.payload
+    localStorage.setItem('loginUser', JSON.stringify(loginUser))
+    yield put(mesTokenLoginSuccess(loginUser))
+    yield put(logged(loginUser))
+    if (resolve) {
+      resolve(loginUser)
+    }
+  } catch (err) {
+    yield put(mesTokenLoginFail(err))
+    errorHandler(err)
+    if (reject) {
+      reject(err)
+    }
+  }
+}
+
 export default function* rootGroupSaga() {
   yield all([
     throttle(1000, CHECK_NAME, checkNameUnique),
@@ -451,6 +478,7 @@ export default function* rootGroupSaga() {
     takeEvery(RESET_PASSWORD_UNLOGGED, resetPasswordUnlogged  as any),
     takeEvery(GET_USER_BY_TOKEN, getUserByToken),
     takeEvery(EOS_SSO_LOGIN, eosSsoLogin),
+    takeEvery(MES_TOKEN_LOGIN, mesTokenLogin),
     takeEvery(JOIN_ORGANIZATION, joinOrganization),
     takeLatest(LOAD_DOWNLOAD_LIST, getDownloadList),
     takeLatest(DOWNLOAD_FILE, downloadFile),

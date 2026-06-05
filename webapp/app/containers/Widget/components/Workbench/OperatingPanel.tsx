@@ -4,6 +4,7 @@ import set from 'lodash/set'
 import debounce from 'lodash/debounce'
 
 import widgetlibs from '../../config'
+import { initChartRegistry, getChartLibs } from 'utils/chartRegistry'
 import { IDataRequestBody } from 'app/containers/Dashboard/types'
 import { IViewBase, IFormedViews, IView } from 'containers/View/types'
 import { ViewModelVisualTypes, ViewModelTypes } from 'containers/View/constants'
@@ -207,10 +208,22 @@ interface IOperatingPanelStates {
   selectedComputed: object
 }
 
+function getWidgetLibsForMode (mode: string) {
+  return mode === 'chart' ? getChartLibs() : widgetlibs[mode || 'pivot']
+}
+
 export class OperatingPanel extends React.Component<
   IOperatingPanelProps,
   IOperatingPanelStates
 > {
+  public componentDidMount () {
+    initChartRegistry().then(() => {
+      if (this.state.mode === 'chart') {
+        this.setState({ currentWidgetlibs: getChartLibs() })
+      }
+    })
+  }
+
   constructor(props) {
     super(props)
     this.state = {
@@ -330,7 +343,7 @@ export class OperatingPanel extends React.Component<
       } = originalWidgetProps
       const { dataParams } = this.state
       const model = selectedView.model
-      const currentWidgetlibs = widgetlibs[mode || 'pivot'] // FIXME 兼容 0.3.0-beta.1 之前版本
+      const currentWidgetlibs = getWidgetLibsForMode(mode || 'pivot') // FIXME 兼容 0.3.0-beta.1 之前版本
       if (mode === 'pivot') {
         model['指标名称'] = {
           sqlType: 'VARCHAR',
@@ -431,7 +444,7 @@ export class OperatingPanel extends React.Component<
           mode: mode || 'pivot', // FIXME 兼容 0.3.0-beta.1 之前版本
           currentWidgetlibs,
           ...(selectedChart && {
-            chartModeSelectedChart: widgetlibs['chart'].find(
+            chartModeSelectedChart: getChartLibs().find(
               (wl) => wl.id === selectedChart
             )
           }),
@@ -1514,7 +1527,7 @@ export class OperatingPanel extends React.Component<
           this.setState(
             {
               mode,
-              currentWidgetlibs: widgetlibs[mode]
+              currentWidgetlibs: getWidgetLibsForMode(mode)
             },
             () => {
               this.resetWorkbench(mode)
@@ -1526,7 +1539,7 @@ export class OperatingPanel extends React.Component<
       this.setState(
         {
           mode,
-          currentWidgetlibs: widgetlibs[mode]
+          currentWidgetlibs: getWidgetLibsForMode(mode)
         },
         () => {
           this.resetWorkbench(mode)

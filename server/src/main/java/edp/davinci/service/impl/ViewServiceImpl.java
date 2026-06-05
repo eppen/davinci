@@ -45,6 +45,7 @@ import edp.davinci.dto.viewDto.*;
 import edp.davinci.model.*;
 import edp.davinci.service.ProjectService;
 import edp.davinci.service.ViewService;
+import edp.davinci.service.mes.MesDatasetService;
 import edp.davinci.service.excel.SQLContext;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -98,6 +99,9 @@ ViewServiceImpl extends BaseEntityService implements ViewService {
 
     @Autowired
     private SqlParseUtils sqlParseUtils;
+
+    @Autowired
+    private MesDatasetService mesDatasetService;
 
     private static final String SQL_VARABLE_KEY = "name";
 
@@ -419,6 +423,9 @@ ViewServiceImpl extends BaseEntityService implements ViewService {
         //结构化Sql
         PaginateWithQueryColumns paginateWithQueryColumns = null;
         try {
+            if (mesDatasetService.isMesApiSource(source)) {
+                return mesDatasetService.querySourcePreview(source, executeSql.getSql(), executeSql.getVariables(), executeSql.getLimit());
+            }
             SqlEntity sqlEntity = sqlParseUtils.parseSql(executeSql.getSql(), executeSql.getVariables(), sqlTempDelimiter, user, true);
             if (null == sqlUtils || null == sqlEntity || StringUtils.isEmpty(sqlEntity.getSql())) {
                 return paginateWithQueryColumns;
@@ -581,14 +588,17 @@ ViewServiceImpl extends BaseEntityService implements ViewService {
             throw new NotFoundException("Source is not found");
         }
 
+        Source source = viewWithSource.getSource();
+        if (mesDatasetService.isMesApiSource(source)) {
+            return mesDatasetService.queryViewData(viewWithSource, executeParam, null);
+        }
+
         String cacheKey = null;
         try {
 
             if (StringUtils.isEmpty(viewWithSource.getSql())) {
                 return null;
             }
-
-            Source source = viewWithSource.getSource();
 
             String sqlTempDelimiter = SqlUtils.getSqlTempDelimiter(source.getProperties());
 

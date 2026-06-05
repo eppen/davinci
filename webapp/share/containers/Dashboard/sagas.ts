@@ -54,6 +54,7 @@ import {
 import {
   getRequestParams,
   getRequestBody,
+  combineFilters,
   getUpdatedPagination,
   getCurrentControlValues,
   getInitialPagination
@@ -324,10 +325,7 @@ export function* getWidgetCsv(action: DashboardActionType) {
       url: `${api.share}/csv/${token}`,
       data: {
         ...rest,
-        filters: filters
-          .concat(tempFilters)
-          .concat(linkageFilters)
-          .concat(globalFilters),
+        filters: combineFilters(filters, tempFilters, linkageFilters, globalFilters),
         params: variables.concat(linkageVariables).concat(globalVariables)
       }
     })

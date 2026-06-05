@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="edp.davinci.dao.ChartTypeMapper">
+
+    <insert id="insert" databaseId="mysql" parameterType="edp.davinci.model.ChartType">
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+        insert into chart_type
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            `code`, `name`, `title`, `category`, `icon`, `renderer`,
+            `config_schema`, `data_schema`, `option_template`,
+            `version`, `builtin`, `enabled`, `description`,
+            `create_by`, `create_time`, `update_by`, `update_time`,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{code}, #{name}, #{title}, #{category}, #{icon}, #{renderer},
+            #{configSchema}, #{dataSchema}, #{optionTemplate},
+            #{version}, #{builtin}, #{enabled}, #{description},
+            #{createBy}, #{createTime}, #{updateBy}, #{updateTime},
+        </trim>
+    </insert>
+
+    <insert id="insert" databaseId="sqlserver" parameterType="edp.davinci.model.ChartType">
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT SCOPE_IDENTITY() AS id
+        </selectKey>
+        insert into chart_type
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            [code], [name], [title], [category], [icon], [renderer],
+            [config_schema], [data_schema], [option_template],
+            [version], [builtin], [enabled], [description],
+            [create_by], [create_time], [update_by], [update_time],
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{code}, #{name}, #{title}, #{category}, #{icon}, #{renderer},
+            #{configSchema}, #{dataSchema}, #{optionTemplate},
+            #{version}, #{builtin}, #{enabled}, #{description},
+            #{createBy}, #{createTime}, #{updateBy}, #{updateTime},
+        </trim>
+    </insert>
+
+</mapper>
