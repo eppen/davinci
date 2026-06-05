@@ -47,7 +47,10 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
+import edp.core.model.Paginate;
 
 @Api(value = "/widgets", tags = "widgets", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 @ApiResponses(@ApiResponse(code = 404, message = "widget not found"))
@@ -253,6 +256,20 @@ public class WidgetController extends BaseController {
 
         ShareResult shareResult = widgetService.shareWidget(id, user, shareEntity);
         return ResponseEntity.ok(new ResultMap(tokenUtils).successAndRefreshToken(request).payload(shareResult));
+    }
+
+    @ApiOperation(value = "get widget data")
+    @PostMapping(value = "/{id}/data", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity getWidgetData(@PathVariable Long id,
+                                        @RequestBody(required = false) ViewExecuteParam executeParam,
+                                        @ApiIgnore @CurrentUser User user,
+                                        HttpServletRequest request) throws SQLException {
+        if (invalidId(id)) {
+            ResultMap resultMap = new ResultMap(tokenUtils).failAndRefreshToken(request).message("Invalid id");
+            return ResponseEntity.status(resultMap.getCode()).body(resultMap);
+        }
+        Paginate<Map<String, Object>> paginate = widgetService.getWidgetData(id, executeParam, user);
+        return ResponseEntity.ok(new ResultMap(tokenUtils).successAndRefreshToken(request).payload(paginate));
     }
 
     @ApiOperation(value = "show sql")

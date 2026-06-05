@@ -68,6 +68,8 @@ interface ISourceConfigModalProps
     resolve: () => any,
     reject: (error: string) => any
   ) => any
+  /** 嵌入设计器：仅展示 MES API / JDBC */
+  embeddedMesMode?: boolean
 }
 
 const commonFormItemStyle = {
@@ -108,7 +110,8 @@ const SourceConfigModal: React.FC<ISourceConfigModalProps> = (props) => {
     onTestSourceConnection,
     onCheckUniqueName,
     onSave,
-    onClose
+    onClose,
+    embeddedMesMode
   } = props
   if (!source) {
     return null
@@ -320,7 +323,7 @@ const SourceConfigModal: React.FC<ISourceConfigModalProps> = (props) => {
               })(
                 <Select onChange={(v: string) => setSourceType(v)}>
                   <Option value="jdbc">JDBC</Option>
-                  <Option value="csv">CSV文件</Option>
+                  {!embeddedMesMode && <Option value="csv">CSV文件</Option>}
                   <Option value="mes_api">MES Dataset API</Option>
                 </Select>
               )}

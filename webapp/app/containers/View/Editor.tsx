@@ -78,6 +78,7 @@ import ViewVariableList from './components/ViewVariableList'
 import VariableModal from './components/VariableModal'
 
 import Styles from './View.less'
+import { isEmbeddedDesigner, postToMesParent } from 'utils/embeddedDesigner'
 
 interface IViewEditorStateProps {
   editingView: IView
@@ -288,8 +289,17 @@ export class ViewEditor extends React.Component<IViewEditorProps, IViewEditorSta
   }
 
   private goToViewList = () => {
-    const { history, match } = this.props
+    const { history, match, editingView } = this.props
     const { projectId } = match.params
+    if (isEmbeddedDesigner()) {
+      postToMesParent('davinci:view-saved', {
+        viewId: editingView && editingView.id,
+        projectId: +projectId,
+        sourceId: editingView && editingView.sourceId,
+        name: editingView && editingView.name
+      })
+      return
+    }
     history.push(`/project/${projectId}/views`)
   }
 
@@ -401,7 +411,11 @@ export class ViewEditor extends React.Component<IViewEditorProps, IViewEditorSta
     const sqlHints = this.getSqlHints(editingView.sourceId, schema, variable)
     const containerVisible = !currentStep
     const modelAuthVisible = !!currentStep
-    const nextDisabled = (editingView.sql !== lastSuccessExecutedSql)
+    const selectedSource = sources.find((s) => s.id === editingView.sourceId)
+    const hideSqlPanel = isEmbeddedDesigner() && selectedSource && selectedSource.type === 'mes_api'
+    const nextDisabled = hideSqlPanel
+      ? !Object.keys(model).length
+      : (editingView.sql !== lastSuccessExecutedSql)
 
     return (
       <>
@@ -427,8 +441,17 @@ export class ViewEditor extends React.Component<IViewEditorProps, IViewEditorSta
               onDatabaseSelect={onLoadDatabaseTables}
               onTableSelect={onLoadTableColumns}
             />
-            <SqlEditor key="SqlEditor" value={editingView.sql} hints={sqlHints} onSqlChange={this.sqlChange} onSelect={this.sqlSelect} onCmdEnter={this.executeSql} />
-            <SqlPreview key="SqlPreview" size="small" loading={loading.execute} response={sqlDataSource} />
+            {!hideSqlPanel && (
+              <>
+                <SqlEditor key="SqlEditor" value={editingView.sql} hints={sqlHints} onSqlChange={this.sqlChange} onSelect={this.sqlSelect} onCmdEnter={this.executeSql} />
+                <SqlPreview key="SqlPreview" size="small" loading={loading.execute} response={sqlDataSource} />
+              </>
+            )}
+            {hideSqlPanel && (
+              <div key="MesApiHint" style={{ padding: 16, color: '#666' }}>
+                MES Dataset API 数据源：请配置 View 变量与字段模型，无需编写 SQL。
+              </div>
+            )}
             <EditorBottom
               key="EditorBottom"
               sqlLimit={sqlLimit}

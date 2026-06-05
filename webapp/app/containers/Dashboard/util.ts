@@ -207,7 +207,7 @@ export function getLocalControlInitialValues(
   formedViews: IFormedViews | IShareFormedViews
 ): ILocalControlConditions {
   const initialValues: ILocalControlConditions = {
-    tempFilters: [], // @TODO combine widget static filters with local filters
+    tempFilters: [],
     variables: []
   }
   controls.forEach((control: IControl) => {
@@ -285,7 +285,6 @@ export function getRequestParams(
       list: sort[FieldSortTypes.Custom].sortList
     }))
 
-  // @TODO combine widget static filters with local filters
   let tempFilters = cachedQueryConditions.tempFilters
   let linkageFilters = cachedQueryConditions.linkageFilters
   let globalFilters = cachedQueryConditions.globalFilters
@@ -409,6 +408,23 @@ export function getRequestParams(
     customOrders,
     drillStatus
   }
+}
+
+export function getWidgetStaticFilters (widget: IWidgetFormed): string[] {
+  return (widget.config.filters || []).reduce(
+    (acc, f) => acc.concat(f.config?.sqlModel || []),
+    [] as string[]
+  )
+}
+
+/** SDK params → View 变量，与 getRequestBody 中 params 语义一致 */
+export function paramsToViewVariables (
+  params: Record<string, string> = {}
+): Array<{ name: string; value: string }> {
+  return Object.keys(params).map((name) => ({
+    name,
+    value: params[name]
+  }))
 }
 
 export function combineFilters (

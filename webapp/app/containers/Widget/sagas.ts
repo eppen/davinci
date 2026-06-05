@@ -73,7 +73,7 @@ export function* addWidget(action: WidgetActionType) {
       config: JSON.parse(addedWidget.config)
     }
     yield put(WidgetActions.widgetAdded(formdWidget))
-    resolve()
+    resolve(addedWidget.id)
   } catch (err) {
     yield put(WidgetActions.addWidgetFail())
     errorHandler(err)

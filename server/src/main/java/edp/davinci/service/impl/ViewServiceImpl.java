@@ -54,6 +54,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -590,7 +592,7 @@ ViewServiceImpl extends BaseEntityService implements ViewService {
 
         Source source = viewWithSource.getSource();
         if (mesDatasetService.isMesApiSource(source)) {
-            return mesDatasetService.queryViewData(viewWithSource, executeParam, null);
+            return mesDatasetService.queryViewData(viewWithSource, executeParam, resolveMesForwardToken());
         }
 
         String cacheKey = null;
@@ -1042,6 +1044,26 @@ ViewServiceImpl extends BaseEntityService implements ViewService {
 				relRoleViewMapper.insertBatch(relRoleViews);
 			}
         });
+    }
+
+    private String resolveMesForwardToken() {
+        try {
+            ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attrs != null) {
+                javax.servlet.http.HttpServletRequest request = attrs.getRequest();
+                String mesToken = request.getHeader("X-Mes-Token");
+                if (!StringUtils.isEmpty(mesToken)) {
+                    return mesToken;
+                }
+                String authorization = request.getHeader("Authorization");
+                if (!StringUtils.isEmpty(authorization)) {
+                    return authorization;
+                }
+            }
+        } catch (Exception e) {
+            log.debug("resolveMesForwardToken skipped: {}", e.getMessage());
+        }
+        return null;
     }
 }
 

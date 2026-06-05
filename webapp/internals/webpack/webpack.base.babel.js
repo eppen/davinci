@@ -220,7 +220,8 @@ module.exports = options => ({
       app: path.resolve(process.cwd(), 'app'),
       share: path.resolve(process.cwd(), 'share'),
       libs: path.resolve(process.cwd(), 'libs'),
-      assets: path.resolve(process.cwd(), 'app/assets')
+      assets: path.resolve(process.cwd(), 'app/assets'),
+      '@mes/chart-core': path.resolve(process.cwd(), '../packages/chart-core/src')
       // fonts: path.resolve(process.cwd(), 'app/assets/fonts')
     }
   },

@@ -1,0 +1,26 @@
+{
+  "code": "mes-oee-gauge",
+  "name": "mes-oee-gauge",
+  "title": "OEE 仪表盘",
+  "category": "mes",
+  "renderer": "echarts",
+  "dataSchema": {
+    "id": 902,
+    "coordinate": "other",
+    "rules": [{ "dimension": [0, 1], "metric": [1, 1] }]
+  },
+  "styleSchema": [
+    { "key": "min", "title": "最小值", "component": "number", "default": 0 },
+    { "key": "max", "title": "最大值", "component": "number", "default": 100 },
+    { "key": "unit", "title": "单位", "component": "input", "default": "%" }
+  ],
+  "optionTemplate": {
+    "series": [{
+      "type": "gauge",
+      "min": "{{style.min}}",
+      "max": "{{style.max}}",
+      "detail": { "formatter": "{value}{{style.unit}}" },
+      "data": [{ "value": "{{metrics[0].value}}", "name": "{{metrics[0].name}}" }]
+    }]
+  }
+}

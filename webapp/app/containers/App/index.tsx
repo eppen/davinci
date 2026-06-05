@@ -45,6 +45,7 @@ import FindPassword from 'containers/FindPassword'
 import { Background } from 'containers/Background/Loadable'
 import { Main } from 'containers/Main/Loadable'
 import { Activate } from 'containers/Register/Loadable'
+import { ChartDesigner, ViewDesigner, SourceDesigner } from 'containers/EmbeddedDesigner/Loadable'
 
 type MappedStates = ReturnType<typeof mapStateToProps>
 type MappedDispatches = ReturnType<typeof mapDispatchToProps>
@@ -150,6 +151,9 @@ export class App extends React.PureComponent<AppProps> {
             <Route path="/activate" component={Activate} />
             <Route path="/joinOrganization" exact component={Background} />
             <Route path="/findPassword" component={FindPassword} />
+            <Route path="/chart-designer" component={logged ? ChartDesigner : Background} />
+            <Route path="/view-designer" component={logged ? ViewDesigner : Background} />
+            <Route path="/source-designer" component={logged ? SourceDesigner : Background} />
             <Route path="/" exact render={this.renderRoute} />
             <Route path="/" component={logged ? Main : Background} />
           </Switch>
