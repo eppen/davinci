@@ -207,7 +207,8 @@ def metric(name: str, chart: dict, agg: str = "sum") -> dict:
 
 
 def empty_data_param(title: str, param_type: str) -> dict:
-    return {"title": title, "type": param_type, "items": []}
+    # value 必填：图表渲染会访问 color.value[metricName]
+    return {"title": title, "type": param_type, "items": [], "value": {}}
 
 
 def base_widget_config(model: dict, chart_styles: dict, selected_chart: int, cols: list, metrics: list) -> dict:

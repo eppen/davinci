@@ -192,7 +192,7 @@ export default function (chartProps: IChartProps, drillOptions?: any) {
         itemStyle: {
           normal: {
             // opacity: interactIndex === undefined ? 1 : 0.25
-            color: color.value[m.name] || defaultThemeColors[i],
+            color: (color && color.value && color.value[m.name]) || defaultThemeColors[i],
             opacity: selectedItems && selectedItems.length > 0 ? 0.7 : 1
           }
         },

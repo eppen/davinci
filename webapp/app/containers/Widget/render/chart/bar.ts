@@ -272,7 +272,7 @@ export default function (chartProps: IChartProps, drillOptions) {
             borderType,
             barBorderRadius,
             color:
-              color.value[m.name] ||
+              (color && color.value && color.value[m.name]) ||
               defaultThemeColors[i % defaultThemeColors.length]
           }
         },
