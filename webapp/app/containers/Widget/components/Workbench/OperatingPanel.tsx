@@ -144,6 +144,8 @@ interface IOperatingPanelProps {
   computed: any[]
   originalComputed: any[]
   onViewSelect: (viewId: number) => void
+  /** 嵌入 chart-designer：锁定 View，不暴露切换 */
+  lockViewSelection?: boolean
   onSetControls: (controls: IControl[], queryMode: ControlQueryMode) => void
   onSetReferences: (references: IReference[]) => void
   onLimitChange: (value) => void
@@ -2399,21 +2401,27 @@ export class OperatingPanel extends React.Component<
       <div className={styles.operatingPanel}>
         <div className={styles.model}>
           <div className={styles.viewSelect}>
-            <Select
-              size="small"
-              placeholder="选择一个View"
-              showSearch
-              dropdownMatchSelectWidth={false}
-              value={selectedView && selectedView.id}
-              onChange={this.viewSelect}
-              filterOption={filterSelectOption}
-            >
-              {(views || []).map(({ id, name }) => (
-                <Option key={id} value={id}>
-                  {name}
-                </Option>
-              ))}
-            </Select>
+            {this.props.lockViewSelection ? (
+              <span className={styles.lockedViewName}>
+                {selectedView ? selectedView.name : '数据集'}
+              </span>
+            ) : (
+              <Select
+                size="small"
+                placeholder="选择一个View"
+                showSearch
+                dropdownMatchSelectWidth={false}
+                value={selectedView && selectedView.id}
+                onChange={this.viewSelect}
+                filterOption={filterSelectOption}
+              >
+                {(views || []).map(({ id, name }) => (
+                  <Option key={id} value={id}>
+                    {name}
+                  </Option>
+                ))}
+              </Select>
+            )}
             {/* <Dropdown overlay={coustomFieldSelectMenu} trigger={['click']} placement="bottomRight">
               <Icon type="plus" />
             </Dropdown> */}

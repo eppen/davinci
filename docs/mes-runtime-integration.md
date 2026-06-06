@@ -4,8 +4,10 @@
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/echarts@4/dist/echarts.min.js"></script>
-<script src="{davinci-host}/mes-chart-runtime.js?v=1.0.0"></script>
+<script src="{davinci-host}/static/mes-chart-runtime.js?v=1.0.0"></script>
 ```
+
+构建产物：`server/src/main/resources/static/mes-chart-runtime.js`。完整 HTML 示例见 [`mes-chart-runtime-example.html`](./mes-chart-runtime-example.html)。
 
 ## 产线看板嵌入示例（Vue2 + jQuery）
 

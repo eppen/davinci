@@ -253,10 +253,14 @@
       name,
       value: params[name]
     }));
+    const staticFilters = (widgetConfig.filters || []).reduce(
+      (acc, f) => acc.concat(f.config && f.config.sqlModel || []),
+      []
+    );
     return {
       groups,
       aggregators,
-      filters: [],
+      filters: staticFilters,
       params: paramList,
       pageNo: 1,
       pageSize: ((_a = widgetConfig.pagination) == null ? void 0 : _a.pageSize) || 500,

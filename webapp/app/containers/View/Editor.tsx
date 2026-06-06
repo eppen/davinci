@@ -151,13 +151,25 @@ export class ViewEditor extends React.Component<IViewEditorProps, IViewEditorSta
     super(props)
     const { onHideNavigator, onLoadSources, onLoadViewDetail, onLoadProjectRoles, onLoadDacChannels, match } = this.props
     onHideNavigator()
-    const { viewId, projectId } = match.params
+    const { viewId, projectId, sourceId } = match.params as {
+      viewId?: string
+      projectId?: string
+      sourceId?: string
+    }
     if (projectId) {
       onLoadSources(+projectId)
       onLoadProjectRoles(+projectId)
     }
     if (viewId) {
       onLoadViewDetail(+viewId)
+    } else if (sourceId) {
+      const { editingView, onUpdateEditingView, onLoadSourceDatabases } = this.props
+      onUpdateEditingView({
+        ...editingView,
+        sourceId: +sourceId,
+        projectId: projectId ? +projectId : editingView.projectId
+      })
+      onLoadSourceDatabases(+sourceId)
     }
     onLoadDacChannels()
   }

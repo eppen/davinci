@@ -580,6 +580,10 @@ export class Workbench extends React.Component<
   }
 
   private cancel = () => {
+    if (isEmbeddedDesigner()) {
+      postToMesParent('davinci:designer-cancel', {})
+      return
+    }
     sessionStorage.removeItem('editWidgetFromDashboard')
     sessionStorage.removeItem('editWidgetFromDisplay')
     this.props.history.goBack()
@@ -682,6 +686,7 @@ export class Workbench extends React.Component<
       settings
     } = this.state
     const { queryMode: workbenchQueryMode, multiDrag } = settings
+    const lockViewSelection = isEmbeddedDesigner() && !!parseDesignerQuery().viewId
 
     const { selectedChart, cols, rows, metrics, data } = widgetProps
     const hasDataConfig = !!(cols.length || rows.length || metrics.length)
@@ -735,6 +740,7 @@ export class Workbench extends React.Component<
                 multiDrag={multiDrag}
                 computed={computed}
                 onViewSelect={this.viewSelect}
+                lockViewSelection={lockViewSelection}
                 onChangeAutoLoadData={this.changeAutoLoadData}
                 onSetControls={this.setControls}
                 onSetReferences={this.setReferences}
