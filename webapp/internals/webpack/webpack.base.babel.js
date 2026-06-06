@@ -9,6 +9,10 @@ const HappyPack = require('happypack')
 const happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length })
 const overrideLessVariables = require('../../app/assets/override/lessVariables')
 
+const webappRoot = path.resolve(__dirname, '../..')
+const repoRoot = path.resolve(webappRoot, '..')
+const chartCoreSrc = path.resolve(repoRoot, 'packages/chart-core/src')
+
 // Remove this line once the following warning goes away (it was meant for webpack loader authors not users):
 // 'DeprecationWarning: loaderUtils.parseQuery() received a non-string value which can be problematic,
 // see https://github.com/webpack/loader-utils/issues/56 parseQuery() will be replaced with getOptions()
@@ -212,17 +216,21 @@ module.exports = options => ({
     }),
   ]),
   resolve: {
-    modules: ['node_modules', 'app'],
+    modules: [
+      path.resolve(webappRoot, 'node_modules'),
+      'node_modules',
+      'app'
+    ],
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.react.js'],
     mainFields: ['browser', 'jsnext:main', 'main'],
     alias: {
-      'react-resizable': path.resolve(process.cwd(), 'libs/react-resizable'),
-      app: path.resolve(process.cwd(), 'app'),
-      share: path.resolve(process.cwd(), 'share'),
-      libs: path.resolve(process.cwd(), 'libs'),
-      assets: path.resolve(process.cwd(), 'app/assets'),
-      '@mes/chart-core': path.resolve(process.cwd(), '../packages/chart-core/src')
-      // fonts: path.resolve(process.cwd(), 'app/assets/fonts')
+      'react-resizable': path.resolve(webappRoot, 'libs/react-resizable'),
+      app: path.resolve(webappRoot, 'app'),
+      share: path.resolve(webappRoot, 'share'),
+      libs: path.resolve(webappRoot, 'libs'),
+      assets: path.resolve(webappRoot, 'app/assets'),
+      '@mes/chart-core': chartCoreSrc
+      // fonts: path.resolve(webappRoot, 'app/assets/fonts')
     }
   },
   devtool: options.devtool,
