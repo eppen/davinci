@@ -23,7 +23,7 @@ import { findDOMNode } from 'react-dom'
 import Helmet from 'react-helmet'
 import { connect } from 'react-redux'
 import { createStructuredSelector } from 'reselect'
-import { Link } from 'react-router-dom'
+import { Link, withRouter } from 'react-router-dom'
 import { compose } from 'redux'
 import injectReducer from 'utils/injectReducer'
 import injectSaga from 'utils/injectSaga'
@@ -862,10 +862,15 @@ export class Grid extends React.Component<IGridProps & RouteComponentWithParams,
   }
 
   private toWorkbench = (itemId, widgetId) => {
-    const { projectId, portalId, dashboardId } = this.props.match.params
+    const { history, match } = this.props
+    if (!history || !widgetId) {
+      message.warning('无法打开 Widget 编辑器')
+      return
+    }
+    const { projectId, portalId, dashboardId } = match.params
     const editSign = [projectId, portalId, dashboardId, itemId].join(DEFAULT_SPLITER)
     sessionStorage.setItem('editWidgetFromDashboard', editSign)
-    this.props.history.push(`/project/${projectId}/widget/${widgetId}`)
+    history.push(`/project/${projectId}/widget/${widgetId}`)
   }
 
   private dataDrill = (drillDetail) => {
@@ -1363,5 +1368,6 @@ export default compose(
   withViewReducer,
   withControlReducer,
   withViewSaga,
-  withConnect
+  withConnect,
+  withRouter
 )(Grid)

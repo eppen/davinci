@@ -67,27 +67,48 @@ export function EditorHeader (props: IEditorHeaderProps) {
     description: '请输入描述…'
   }
 
+  const isDashboardHeader = currentType === 'dashboard'
+  const titleClassName = isDashboardHeader
+    ? `${styles.title} ${styles.dashboardTitle}`
+    : styles.title
+
+  const handleBackKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onCancel()
+    }
+  }
+
   return (
     <div className={`${styles.editorHeader} ${className}`}>
-      <Icon type="left" className={styles.back} onClick={onCancel} />
-      <div className={styles.title}>
+      <span
+        role="button"
+        tabIndex={0}
+        aria-label="返回"
+        className={styles.back}
+        onClick={onCancel}
+        onKeyDown={handleBackKeyDown}
+      >
+        <Icon type="left" />
+      </span>
+      <div className={titleClassName}>
         <div className={styles.name}>
           <input
             type="text"
             placeholder={placeholder.name}
             value={name}
             onChange={onNameChange}
-            readOnly={currentType === 'dashboard'}
+            readOnly={isDashboardHeader}
           />
           <span>{name || placeholder.name}</span>
         </div>
         <div className={styles.desc}>
           <input
             type="text"
-            placeholder={currentType === 'dashboard' ? '' : placeholder.description}
+            placeholder={isDashboardHeader ? '' : placeholder.description}
             value={description}
             onChange={onDescriptionChange}
-            readOnly={currentType === 'dashboard'}
+            readOnly={isDashboardHeader}
           />
           <span>{description || placeholder.description}</span>
         </div>
