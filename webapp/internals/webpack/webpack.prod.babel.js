@@ -134,18 +134,22 @@ module.exports = require('./webpack.base.babel')({
 
     new CaseSensitivePathsPlugin(),
 
-    new BundleAnalyzerPlugin({
-      analyzerMode: 'server',
-      analyzerHost: 'localhost',
-      analyzerPort: 5000,
-      reportFilename: 'report.html',
-      defaultSizes: 'parsed',
-      openAnalyzer: true,
-      generateStatsFile: true,
-      statsFilename: '../stats.json',
-      statsOptions: null,
-      logLevel: 'info'
-    })
+    ...(process.env.CI
+      ? []
+      : [
+          new BundleAnalyzerPlugin({
+            analyzerMode: 'server',
+            analyzerHost: 'localhost',
+            analyzerPort: 5000,
+            reportFilename: 'report.html',
+            defaultSizes: 'parsed',
+            openAnalyzer: true,
+            generateStatsFile: true,
+            statsFilename: '../stats.json',
+            statsOptions: null,
+            logLevel: 'info'
+          })
+        ])
   ],
 
   performance: {

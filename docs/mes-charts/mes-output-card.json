@@ -1,0 +1,43 @@
+{
+  "code": "mes-output-card",
+  "name": "mes-output-card",
+  "title": "产量卡片",
+  "category": "mes",
+  "renderer": "echarts",
+  "dataSchema": {
+    "id": 901,
+    "coordinate": "other",
+    "rules": [{ "dimension": [0, 1], "metric": [1, 1] }]
+  },
+  "styleSchema": [
+    { "key": "unit", "title": "单位", "component": "input", "default": "件" },
+    { "key": "title", "title": "标题", "component": "input", "default": "当班产量" }
+  ],
+  "optionTemplate": {
+    "graphic": [
+      {
+        "type": "text",
+        "left": "center",
+        "top": "40%",
+        "style": {
+          "text": "{{metrics[0].value}}{{style.unit}}",
+          "fontSize": 36,
+          "fontWeight": "bold",
+          "fill": "#333",
+          "textAlign": "center"
+        }
+      },
+      {
+        "type": "text",
+        "left": "center",
+        "top": "60%",
+        "style": {
+          "text": "{{style.title}}",
+          "fontSize": 14,
+          "fill": "#666",
+          "textAlign": "center"
+        }
+      }
+    ]
+  }
+}

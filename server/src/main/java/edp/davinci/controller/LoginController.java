@@ -24,6 +24,7 @@ import edp.core.exception.ServerException;
 import edp.core.utils.TokenUtils;
 import edp.davinci.core.common.Constants;
 import edp.davinci.core.common.ResultMap;
+import edp.davinci.core.config.AuthSsoProperties;
 import edp.davinci.dto.userDto.UserLogin;
 import edp.davinci.dto.userDto.UserLoginResult;
 import edp.davinci.model.User;
@@ -74,6 +75,9 @@ public class LoginController {
 
     @Autowired(required = false)
     private ClientRegistrationRepository clientRegistrationRepository;
+
+    @Autowired
+    private AuthSsoProperties authSsoProperties;
 
     /**
      * 登录
@@ -148,6 +152,10 @@ public class LoginController {
     @AuthIgnore
     @PostMapping(value = "sso-ticket", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity ssoTicketLogin(@RequestParam("ticket") String ticket) {
+        if ("mes-jwt".equalsIgnoreCase(authSsoProperties.getMode())) {
+            ResultMap resultMap = new ResultMap().fail().message("EOS SSO ticket login is disabled (auth.sso.mode=mes-jwt)");
+            return ResponseEntity.status(resultMap.getCode()).body(resultMap);
+        }
         if (com.alibaba.druid.util.StringUtils.isEmpty(ticket)) {
             ResultMap resultMap = new ResultMap().fail().message("SSO ticket is required");
             return ResponseEntity.status(resultMap.getCode()).body(resultMap);
@@ -168,6 +176,10 @@ public class LoginController {
     @PostMapping(value = "mes-token", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity mesTokenLogin(@RequestParam(value = "token", required = false) String tokenParam,
                                         @RequestBody(required = false) java.util.Map<String, String> body) {
+        if ("eos-ticket".equalsIgnoreCase(authSsoProperties.getMode())) {
+            ResultMap resultMap = new ResultMap().fail().message("MES token login is disabled (auth.sso.mode=eos-ticket)");
+            return ResponseEntity.status(resultMap.getCode()).body(resultMap);
+        }
         String token = tokenParam;
         if (com.alibaba.druid.util.StringUtils.isEmpty(token) && body != null) {
             token = body.get("token");

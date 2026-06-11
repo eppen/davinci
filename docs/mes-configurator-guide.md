@@ -124,8 +124,23 @@ http://{gateway}/sso/launch?token={EOS_TOKEN}&app=davinci&redirect=%2F%23%2Fproj
 - **MES 正式对接**：不是该 URL，而是各 Widget 的 `widgetId`（Phase 2 SDK）或分享 / SSO 嵌入整页。
 - **临时整页嵌入 MES**：用分享链接或 SSO redirect，勿用需单独登录的 `#/project/...` 直连。
 
+## MES 报表配置菜单（Phase 2）
+
+MES 侧三级页面（`mes-web/modules/bi/`）：
+
+| 菜单 | 页面 | 功能 |
+|------|------|------|
+| 数据连接 | `source-list.html` | Source 列表 + source-designer iframe |
+| 数据集 | `view-list.html` | View 列表 + view-designer iframe |
+| 图表库 | `widget-list.html` | Widget 列表 + chart-designer iframe |
+
+配置项：`window.DAVINCI_API_BASE`、`window.DAVINCI_WEB_BASE`、`window.DAVINCI_PROJECT_ID`。
+
+一线看板使用 `@mes/chart-runtime`，见 [运行时集成说明](./mes-runtime-integration.md)。
+
 ## 相关文档
 
 - [集成路线图](./mes-chart-integration-roadmap.md)
+- [运行时 SDK 集成](./mes-runtime-integration.md)
 - [Dataset API 契约](./mes-dataset-api.openapi.yaml)
 - [EOS SSO](./eos-sso-integration.md)

@@ -119,5 +119,30 @@ public class ChartTypeServiceImpl implements ChartTypeService {
         if (StringUtils.isEmpty(chartType.getTitle())) {
             throw new ServerException("Chart type title is required");
         }
+        validateJsonField(chartType.getConfigSchema(), "configSchema");
+        validateJsonField(chartType.getDataSchema(), "dataSchema");
+        if (!StringUtils.isEmpty(chartType.getOptionTemplate())) {
+            validateJsonField(chartType.getOptionTemplate(), "optionTemplate");
+        }
+        if ("mes".equals(chartType.getCategory())
+                && StringUtils.isEmpty(chartType.getOptionTemplate())
+                && !"mes-wip-table".equals(chartType.getCode())) {
+            throw new ServerException("MES chart type requires optionTemplate");
+        }
+    }
+
+    private void validateJsonField(String json, String fieldName) throws ServerException {
+        if (StringUtils.isEmpty(json)) {
+            return;
+        }
+        String trimmed = json.trim();
+        if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+            throw new ServerException(fieldName + " must be valid JSON");
+        }
+        try {
+            com.alibaba.fastjson.JSON.parse(trimmed);
+        } catch (Exception e) {
+            throw new ServerException(fieldName + " must be valid JSON: " + e.getMessage());
+        }
     }
 }

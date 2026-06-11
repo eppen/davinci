@@ -23,7 +23,7 @@ import { findDOMNode } from 'react-dom'
 import Helmet from 'react-helmet'
 import { connect } from 'react-redux'
 import { createStructuredSelector } from 'reselect'
-import { Link } from 'react-router-dom'
+import { Link, withRouter } from 'react-router-dom'
 import { compose } from 'redux'
 import injectReducer from 'utils/injectReducer'
 import injectSaga from 'utils/injectSaga'
@@ -42,6 +42,12 @@ import { RouteComponentWithParams } from 'utils/types'
 
 import Container, { ContainerTitle, ContainerBody } from 'components/Container'
 import Toolbar from './components/Toolbar'
+import LayoutSelector from './components/LayoutSelector'
+import {
+  applyLayoutPreset,
+  getNextSlots,
+  resolveLayoutPreset
+} from './components/layoutPresetUtil'
 import DashboardItemForm from './components/DashboardItemForm'
 import DashboardItem from './components/DashboardItem'
 import DashboardLinkageConfig from './components/DashboardLinkageConfig'
@@ -139,6 +145,8 @@ interface IGridStates {
   linkageConfigVisible: boolean
   interactingStatus: { [itemId: number]: boolean }
   globalControlConfigVisible: boolean
+  layoutSelectorVisible: boolean
+  layoutApplying: boolean
   nextMenuTitle: string
 }
 
@@ -165,6 +173,8 @@ export class Grid extends React.Component<IGridProps & RouteComponentWithParams,
       linkageConfigVisible: false,
       interactingStatus: {},
       globalControlConfigVisible: false,
+      layoutSelectorVisible: false,
+      layoutApplying: false,
 
       nextMenuTitle: ''
     }
@@ -279,6 +289,8 @@ export class Grid extends React.Component<IGridProps & RouteComponentWithParams,
           this.lazyLoad()
           this.containerBody.current.removeEventListener('scroll', this.lazyLoad, false)
           this.containerBody.current.addEventListener('scroll', this.lazyLoad, false)
+          window.dispatchEvent(new Event('resize'))
+          this.props.onResizeAllDashboardItem()
         })
       }
     }
@@ -541,21 +553,6 @@ export class Grid extends React.Component<IGridProps & RouteComponentWithParams,
     const portalId = +match.params.portalId
     const { selectedWidgets, dashboardItemFormType } = this.state
     const formdata: any = this.dashboardItemForm.props.form.getFieldsValue()
-    const cols = GRID_COLS.lg
-
-    const yArr = [...currentItems.map((item) => item.y + item.height), 0]
-    const maxY = Math.max(...yArr)
-    const secondMaxY = maxY === 0 ? 0 : Math.max(...yArr.filter((y) => y !== maxY))
-
-    let maxX = 0
-    if (maxY) {
-      const maxYItems = currentItems.filter((item) => item.y + item.height === maxY)
-      maxX = Math.max(...maxYItems.map((item) => item.x + item.width))
-
-      // if (maxX + 6 > cols) {
-        // maxX = 0
-      // }
-    }
 
     this.setState({ modalLoading: true })
 
@@ -566,34 +563,18 @@ export class Grid extends React.Component<IGridProps & RouteComponentWithParams,
     }
 
     if (dashboardItemFormType === 'add') {
-      const positionInfo = {
-        width: 6,
-        height: 6
-      }
+      const preset = resolveLayoutPreset(currentDashboard.config.layoutTemplate)
+      const slots = getNextSlots(preset, currentItems, selectedWidgets.length)
 
       const newItems = selectedWidgets.map((key, index) => {
-        const xAxisTemp = index % 2 !== 0 ? 6 : 0
-        const yAxisTemp = index % 2 === 0
-          ? secondMaxY + 6 * Math.floor(index / 2)
-          : maxY + 6 * Math.floor(index / 2)
-        let xAxis
-        let yAxis
-        if (maxX > 0 && maxX <= 6) {
-          xAxis = index % 2 === 0 ? 6 : 0
-          yAxis = yAxisTemp
-        } else if (maxX === 0) {
-          xAxis = xAxisTemp
-          yAxis = yAxisTemp
-        } else if (maxX > 6) {
-          xAxis = xAxisTemp
-          yAxis = maxY + 6 * Math.floor(index / 2)
-        }
+        const slot = slots[index]
         const item = {
           widgetId: key,
-          x: xAxis,
-          y: yAxis,
-          ...newItem,
-          ...positionInfo
+          x: slot.x,
+          y: slot.y,
+          width: slot.width,
+          height: slot.height,
+          ...newItem
         }
         return item
       })
@@ -777,6 +758,64 @@ export class Grid extends React.Component<IGridProps & RouteComponentWithParams,
     })
   }
 
+  private openLayoutSelector = () => {
+    this.setState({
+      layoutSelectorVisible: true
+    })
+  }
+
+  private closeLayoutSelector = () => {
+    this.setState({
+      layoutSelectorVisible: false,
+      layoutApplying: false
+    })
+  }
+
+  private applyLayoutTemplate = (presetId: string) => {
+    const {
+      match,
+      currentDashboard,
+      currentItems,
+      onEditCurrentDashboard,
+      onEditDashboardItems,
+      onResizeAllDashboardItem
+    } = this.props
+    const portalId = +match.params.portalId
+
+    if (!currentDashboard || !currentItems) {
+      return
+    }
+
+    this.setState({ layoutApplying: true })
+
+    const preset = resolveLayoutPreset(presetId)
+    const saveTemplate = () => {
+      onEditCurrentDashboard(
+        {
+          ...currentDashboard,
+          config: {
+            ...currentDashboard.config,
+            layoutTemplate: presetId
+          }
+        },
+        'layout',
+        () => {
+          this.setState({ layoutApplying: false })
+          this.closeLayoutSelector()
+          onResizeAllDashboardItem()
+        }
+      )
+    }
+
+    if (currentItems.length > 0) {
+      const changedItems = applyLayoutPreset(currentItems, preset)
+      onEditDashboardItems(portalId, changedItems)
+      saveTemplate()
+    } else {
+      saveTemplate()
+    }
+  }
+
   private saveControls = (controls, queryMode) => {
     const {
       currentDashboard,
@@ -823,10 +862,15 @@ export class Grid extends React.Component<IGridProps & RouteComponentWithParams,
   }
 
   private toWorkbench = (itemId, widgetId) => {
-    const { projectId, portalId, dashboardId } = this.props.match.params
+    const { history, match } = this.props
+    if (!history || !widgetId) {
+      message.warning('无法打开 Widget 编辑器')
+      return
+    }
+    const { projectId, portalId, dashboardId } = match.params
     const editSign = [projectId, portalId, dashboardId, itemId].join(DEFAULT_SPLITER)
     sessionStorage.setItem('editWidgetFromDashboard', editSign)
-    this.props.history.push(`/project/${projectId}/widget/${widgetId}`)
+    history.push(`/project/${projectId}/widget/${widgetId}`)
   }
 
   private dataDrill = (drillDetail) => {
@@ -1101,6 +1145,7 @@ export class Grid extends React.Component<IGridProps & RouteComponentWithParams,
               onOpenSharePanel={this.openDashboardSharePanel}
               onOpenGlobalControlConfig={this.openGlobalControlConfig}
               onOpenLinkageConfig={this.openLinkageConfig}
+              onOpenLayoutSelector={this.openLayoutSelector}
               onDownloadDashboard={this.initiateDashboardDownloadTask}
             />
           </Row>
@@ -1130,6 +1175,14 @@ export class Grid extends React.Component<IGridProps & RouteComponentWithParams,
           onMonitoredSearchDataAction={onMonitoredSearchDataAction}
         />
         <SharePanel />
+        <LayoutSelector
+          visible={this.state.layoutSelectorVisible}
+          currentTemplate={currentDashboard && currentDashboard.config.layoutTemplate}
+          widgetCount={currentItems ? currentItems.length : 0}
+          loading={this.state.layoutApplying}
+          onApply={this.applyLayoutTemplate}
+          onCancel={this.closeLayoutSelector}
+        />
         {gridEditable && (
           <>
             <Modal
@@ -1215,7 +1268,7 @@ export function mapDispatchToProps (dispatch) {
     ) => dispatch(addDashboardItems(portalId, items, resolve)),
     onEditCurrentDashboard: (
       dashboard: IDashboard,
-      type: 'linkage' | 'control',
+      type: 'linkage' | 'control' | 'layout',
       resolve: () => void
     ) => dispatch(VizActions.editCurrentDashboard(dashboard, type, resolve)),
     onEditDashboardItem: (
@@ -1315,5 +1368,6 @@ export default compose(
   withViewReducer,
   withControlReducer,
   withViewSaga,
-  withConnect
+  withConnect,
+  withRouter
 )(Grid)

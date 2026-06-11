@@ -57,9 +57,10 @@ export class Chart extends React.PureComponent<IChartProps, IChartStates> {
         this.collectSelectedItems(params)
       })
 
+      const chartInfo = getChartLibs().find((cl) => cl.id === selectedChart)
       this.instance.setOption(
         chartOptionGenerator(
-          getChartLibs().find((cl) => cl.id === selectedChart).name,
+          chartInfo,
           props,
           {
             instance: this.instance,

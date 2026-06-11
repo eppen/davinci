@@ -1,0 +1,23 @@
+{
+  "code": "mes-pareto-bar",
+  "name": "mes-pareto-bar",
+  "title": "不良 Pareto",
+  "category": "mes",
+  "renderer": "echarts",
+  "dataSchema": {
+    "id": 904,
+    "coordinate": "cartesian",
+    "rules": [{ "dimension": [1, 1], "metric": [1, 2] }]
+  },
+  "styleSchema": [
+    { "key": "showLine", "title": "显示累计线", "component": "switch", "default": true }
+  ],
+  "optionTemplate": {
+    "xAxis": { "type": "category", "data": "{{colValues}}" },
+    "yAxis": [{ "type": "value" }, { "type": "value", "max": 100 }],
+    "series": [
+      { "type": "bar", "data": "{{metricValues}}" },
+      { "type": "line", "yAxisIndex": 1, "data": "{{metricValues2}}" }
+    ]
+  }
+}

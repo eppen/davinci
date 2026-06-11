@@ -1,0 +1,14 @@
+{
+  "code": "mes-wip-table",
+  "name": "mes-wip-table",
+  "title": "在制工单表",
+  "category": "mes",
+  "renderer": "table",
+  "dataSchema": {
+    "id": 1,
+    "coordinate": "other",
+    "rules": [{ "dimension": [0, 9999], "metric": [0, 9999] }]
+  },
+  "styleSchema": [],
+  "optionTemplate": null
+}

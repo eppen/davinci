@@ -18,6 +18,7 @@ interface IToolbarProps {
   onOpenSharePanel: () => void
   onOpenLinkageConfig: () => void
   onOpenGlobalControlConfig: () => void
+  onOpenLayoutSelector: () => void
   onDownloadDashboard: () => void
 }
 
@@ -33,6 +34,7 @@ export class Toolbar extends React.PureComponent<IToolbarProps> {
       onOpenSharePanel,
       onOpenLinkageConfig,
       onOpenGlobalControlConfig,
+      onOpenLayoutSelector,
       onDownloadDashboard
     } = this.props
 
@@ -41,12 +43,14 @@ export class Toolbar extends React.PureComponent<IToolbarProps> {
     const DownloadButton = ShareDownloadPermission<ButtonProps>(currentProject, 'download')(Button)
     const LinkageButton = ModulePermission<ButtonProps>(currentProject, 'viz', false)(Button)
     const GlobalFilterButton = ModulePermission<ButtonProps>(currentProject, 'viz', false)(Button)
+    const LayoutButton = ModulePermission<ButtonProps>(currentProject, 'viz', false)(Button)
 
     let addButton
     let shareButton
     let downloadButton
     let linkageButton
     let globalFilterButton
+    let layoutButton
 
     addButton = (
       <Tooltip placement="bottom" title="新增">
@@ -103,10 +107,21 @@ export class Toolbar extends React.PureComponent<IToolbarProps> {
         />
       </Tooltip>
     )
+    layoutButton = (
+      <Tooltip placement="bottom" title="布局">
+        <LayoutButton
+          type="primary"
+          icon="appstore"
+          style={{marginLeft: '8px'}}
+          onClick={onOpenLayoutSelector}
+        />
+      </Tooltip>
+    )
 
     return (
       <Col sm={12} className={utilStyles.textAlignRight}>
         {addButton}
+        {layoutButton}
         {shareButton}
         {downloadButton}
         {linkageButton}

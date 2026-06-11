@@ -44,6 +44,7 @@ import { getStyleConfig } from 'containers/Widget/components/util'
 import ChartTypes from '../../config/chart/ChartTypes'
 import { FieldSortTypes, fieldGroupedSort } from '../Config/Sort'
 import { message } from 'antd'
+import { isEmbeddedDesigner, parseDesignerQuery, postToMesParent } from 'utils/embeddedDesigner'
 import 'assets/less/resizer.less'
 import {
   IDistinctValueReqeustParams,
@@ -75,7 +76,7 @@ interface IWorkbenchProps {
     resolve: (data) => void,
     reject: (error) => void
   ) => void
-  onAddWidget: (widget: Omit<IWidgetRaw, 'id'>, resolve: () => void) => void
+  onAddWidget: (widget: Omit<IWidgetRaw, 'id'>, resolve: (id?: number) => void) => void
   onEditWidget: (widget: IWidgetRaw, resolve: () => void) => void
   onLoadColumnDistinctValue: (
     paramsByViewId: {
@@ -174,6 +175,11 @@ export class Workbench extends React.Component<
     this.loadViews(() => {
       if (widgetId !== 'add' && !Number.isNaN(Number(widgetId))) {
         onLoadWidgetDetail(+widgetId)
+      } else if (isEmbeddedDesigner()) {
+        const qs = parseDesignerQuery()
+        if (qs.viewId) {
+          this.setState({ selectedViewId: +qs.viewId })
+        }
       }
     })
   }
@@ -522,6 +528,14 @@ export class Workbench extends React.Component<
     if (id) {
       onEditWidget({ ...widget, id }, () => {
         message.success('修改成功')
+        if (isEmbeddedDesigner()) {
+          postToMesParent('davinci:widget-saved', {
+            widgetId: id,
+            projectId: Number(match.params.projectId),
+            viewId: selectedViewId
+          })
+          return
+        }
         const editSignDashboard = sessionStorage.getItem(
           'editWidgetFromDashboard'
         )
@@ -550,14 +564,26 @@ export class Workbench extends React.Component<
         }
       })
     } else {
-      onAddWidget(widget, () => {
+      onAddWidget(widget, (addedId?: number) => {
         message.success('添加成功')
+        if (isEmbeddedDesigner()) {
+          postToMesParent('davinci:widget-saved', {
+            widgetId: addedId,
+            projectId: Number(match.params.projectId),
+            viewId: selectedViewId
+          })
+          return
+        }
         this.props.history.replace(`/project/${match.params.projectId}/widgets`)
       })
     }
   }
 
   private cancel = () => {
+    if (isEmbeddedDesigner()) {
+      postToMesParent('davinci:designer-cancel', {})
+      return
+    }
     sessionStorage.removeItem('editWidgetFromDashboard')
     sessionStorage.removeItem('editWidgetFromDisplay')
     this.props.history.goBack()
@@ -660,6 +686,7 @@ export class Workbench extends React.Component<
       settings
     } = this.state
     const { queryMode: workbenchQueryMode, multiDrag } = settings
+    const lockViewSelection = isEmbeddedDesigner() && !!parseDesignerQuery().viewId
 
     const { selectedChart, cols, rows, metrics, data } = widgetProps
     const hasDataConfig = !!(cols.length || rows.length || metrics.length)
@@ -713,6 +740,7 @@ export class Workbench extends React.Component<
                 multiDrag={multiDrag}
                 computed={computed}
                 onViewSelect={this.viewSelect}
+                lockViewSelection={lockViewSelection}
                 onChangeAutoLoadData={this.changeAutoLoadData}
                 onSetControls={this.setControls}
                 onSetReferences={this.setReferences}

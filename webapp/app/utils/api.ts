@@ -49,5 +49,6 @@ export default {
   buriedPoints: `${API_HOST}/statistic`,
   configurations: `${API_HOST}/configurations`,
   chartTypes: `${API_HOST}/chart-types`,
-  loginMesToken: `${API_HOST}/login/mes-token`
+  loginMesToken: `${API_HOST}/login/mes-token`,
+  widgetData: (id: number | string) => `${API_HOST}/widgets/${id}/data`
 }

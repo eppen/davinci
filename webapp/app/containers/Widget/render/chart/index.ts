@@ -34,8 +34,23 @@ import doubleYAxis from './doubleYAxis'
 import gauge from './gauge'
 import { EChartOption } from 'echarts'
 import { IChartProps } from '../../components/Chart'
+import { renderDslOption } from '@mes/chart-core'
+import { IChartInfo } from '../../components/Widget'
 
-export default function (type, chartProps: IChartProps, drillOptions?: any): EChartOption {
+export default function (
+  typeOrChart: string | IChartInfo,
+  chartProps: IChartProps,
+  drillOptions?: any
+): EChartOption {
+  const chartInfo = typeof typeOrChart === 'string'
+    ? null
+    : typeOrChart
+  const type = typeof typeOrChart === 'string' ? typeOrChart : typeOrChart.name
+
+  if (chartInfo && chartInfo.optionTemplate) {
+    return renderDslOption(chartInfo.optionTemplate, chartProps) as EChartOption
+  }
+
   switch (type) {
     case 'line': return line(chartProps, drillOptions)
     // @ts-ignore

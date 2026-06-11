@@ -37,6 +37,7 @@ export interface IDashboardConfig {
   filters: IControl[]
   linkages: any[]
   queryMode: ControlQueryMode
+  layoutTemplate?: string
 }
 
 export interface IDashboardDetailRaw extends IDashboardRaw {

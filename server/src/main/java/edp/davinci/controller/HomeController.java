@@ -21,6 +21,7 @@ package edp.davinci.controller;
 
 import edp.core.annotation.AuthIgnore;
 import edp.davinci.core.common.Constants;
+import edp.davinci.core.config.AuthSsoProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
@@ -37,6 +38,9 @@ public class HomeController {
 
     @Autowired
     private Environment environment;
+
+    @Autowired
+    private AuthSsoProperties authSsoProperties;
 
     @RequestMapping("swagger")
     public String swagger() {
@@ -66,6 +70,9 @@ public class HomeController {
             put("oauth2", new HashMap<String, Object>() {{
                 put("enable", Boolean.valueOf(environment.getProperty("spring.security.oauth2.enable")));
             }});
+        }});
+        configs.put("authSso", new HashMap<String, Object>() {{
+            put("mode", authSsoProperties.getMode());
         }});
 
         return new HashMap<String, Object>() {{

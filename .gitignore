@@ -34,3 +34,7 @@ userfiles/
 bin/upgrade.go
 bin/upgrade
 .history/
+node_modules/
+lib/
+davinci-ui/
+CUsersdllhlAppDataLocalTempgithub_known_hosts

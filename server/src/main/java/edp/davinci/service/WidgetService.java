@@ -33,7 +33,10 @@ import edp.davinci.dto.widgetDto.WidgetUpdate;
 import edp.davinci.model.User;
 import edp.davinci.model.Widget;
 
+import edp.core.model.Paginate;
+
 import java.io.File;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,4 +59,7 @@ public interface WidgetService extends CheckEntityService {
     File writeExcel(Set<Widget> widgets, ProjectDetail projectDetail, Map<Long, ViewExecuteParam> executeParamMap, String filePath, User user, boolean containType) throws Exception;
 
     String showSql(Long id, ViewExecuteParam executeParam, User user) throws NotFoundException, UnAuthorizedException, ServerException;
+
+    Paginate<Map<String, Object>> getWidgetData(Long id, ViewExecuteParam executeParam, User user)
+            throws NotFoundException, UnAuthorizedException, ServerException, SQLException;
 }

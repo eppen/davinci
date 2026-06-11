@@ -24,6 +24,7 @@ import com.alibaba.fastjson.JSON;
 import edp.core.exception.NotFoundException;
 import edp.core.exception.ServerException;
 import edp.core.exception.UnAuthorizedException;
+import edp.core.model.Paginate;
 import edp.core.model.PaginateWithQueryColumns;
 import edp.core.model.QueryColumn;
 import edp.core.utils.*;
@@ -75,6 +76,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -567,5 +569,15 @@ public class WidgetServiceImpl extends BaseEntityService implements WidgetServic
         querySqlList.forEach(s -> res.append(s).append(NEW_LINE_CHAR));
 
         return res.toString();
+    }
+
+    @Override
+    public Paginate<Map<String, Object>> getWidgetData(Long id, ViewExecuteParam executeParam, User user)
+            throws NotFoundException, UnAuthorizedException, ServerException, SQLException {
+        Widget widget = getWidget(id, user);
+        if (widget.getViewId() == null) {
+            throw new ServerException("Widget has no bound view");
+        }
+        return viewService.getData(widget.getViewId(), executeParam, user);
     }
 }

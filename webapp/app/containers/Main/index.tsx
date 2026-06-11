@@ -110,7 +110,8 @@ export class Main extends React.Component<IMainProps, {}> {
     return logged ? (
       <div className={styles.container}>
         <Navigator show={navigator} onLogout={this.logout} />
-        <Switch>
+        <div className={styles.routeContent}>
+          <Switch>
           <Route path="/project(s?)">
             <Switch>
               <Route path="/projects" exact component={ProjectList} />
@@ -128,17 +129,29 @@ export class Main extends React.Component<IMainProps, {}> {
                     <Route
                       exact
                       path="/project/:projectId/widget/:widgetId?"
-                      component={Workbench}
+                      render={(props) => (
+                        <div className={styles.fullScreenPage}>
+                          <Workbench {...props} />
+                        </div>
+                      )}
                     />
                     <Route
                       exact
                       path="/project/:projectId/view/:viewId?"
-                      component={ViewEditor}
+                      render={(props) => (
+                        <div className={styles.fullScreenPage}>
+                          <ViewEditor {...props} />
+                        </div>
+                      )}
                     />
                     <Route
                       exact
                       path="/project/:projectId/schedule/:scheduleId?"
-                      component={ScheduleEditor}
+                      render={(props) => (
+                        <div className={styles.fullScreenPage}>
+                          <ScheduleEditor {...props} />
+                        </div>
+                      )}
                     />
                     <Sidebar>
                       <Switch>
@@ -179,6 +192,7 @@ export class Main extends React.Component<IMainProps, {}> {
           <Route path="/noAuthorization" component={NoAuthorization} />
           <Redirect to="/projects" />
         </Switch>
+        </div>
       </div>
     ) : (
       <div />

@@ -64,6 +64,7 @@ import TableSection from './ConfigSections/TableSection'
 import GaugeSection from './ConfigSections/GaugeSection'
 import BarSection from './ConfigSections/BarSection'
 import RadarSection from './ConfigSections/RadarSection'
+import DynamicStyleSection from './ConfigSections/DynamicStyleSection'
 import {
   encodeMetricName,
   decodeMetricName,
@@ -143,6 +144,8 @@ interface IOperatingPanelProps {
   computed: any[]
   originalComputed: any[]
   onViewSelect: (viewId: number) => void
+  /** 嵌入 chart-designer：锁定 View，不暴露切换 */
+  lockViewSelection?: boolean
   onSetControls: (controls: IControl[], queryMode: ControlQueryMode) => void
   onSetReferences: (references: IReference[]) => void
   onLimitChange: (value) => void
@@ -1961,8 +1964,11 @@ export class OperatingPanel extends React.Component<
       table,
       bar,
       radar,
-      doubleYAxis
+      doubleYAxis,
+      dsl
     } = styleParams
+
+    const isDslChart = !!(chartModeSelectedChart && chartModeSelectedChart.isDsl)
 
     let categoryDragItems = this.state.categoryDragItems
     if (
@@ -2092,7 +2098,15 @@ export class OperatingPanel extends React.Component<
       case 'style':
         tabPane = (
           <div className={styles.paramsPane}>
-            {spec && (
+            {isDslChart && chartModeSelectedChart.styleSchema && (
+              <DynamicStyleSection
+                title="图表样式"
+                schema={chartModeSelectedChart.styleSchema}
+                config={dsl || {}}
+                onChange={this.styleChange('dsl')}
+              />
+            )}
+            {!isDslChart && spec && (
               <SpecSection
                 name={chartModeSelectedChart.name}
                 title={chartModeSelectedChart.title}
@@ -2101,17 +2115,17 @@ export class OperatingPanel extends React.Component<
                 isLegendSection={mapLegendLayerType}
               />
             )}
-            {bar && (
+            {!isDslChart && bar && (
               <BarSection
                 onChange={this.styleChange('bar')}
                 config={bar}
                 dataParams={dataParams}
               />
             )}
-            {radar && (
+            {!isDslChart && radar && (
               <RadarSection config={radar} onChange={this.styleChange2} />
             )}
-            {mapLabelLayerType
+            {!isDslChart && mapLabelLayerType
               ? label && (
                   <LabelSection
                     title="标签"
@@ -2121,7 +2135,7 @@ export class OperatingPanel extends React.Component<
                   />
                 )
               : null}
-            {mapLegendLayerType
+            {!isDslChart && mapLegendLayerType
               ? legend && (
                   <LegendSection
                     title="图例"
@@ -2130,7 +2144,7 @@ export class OperatingPanel extends React.Component<
                   />
                 )
               : null}
-            {mapLegendLayerType
+            {!isDslChart && mapLegendLayerType
               ? null
               : visualMap && (
                   <VisualMapSection
@@ -2139,84 +2153,84 @@ export class OperatingPanel extends React.Component<
                     onChange={this.styleChange('visualMap')}
                   />
                 )}
-            {toolbox && (
+            {!isDslChart && toolbox && (
               <ToolboxSection
                 title="工具"
                 config={toolbox}
                 onChange={this.styleChange('toolbox')}
               />
             )}
-            {doubleYAxis && (
+            {!isDslChart && doubleYAxis && (
               <DoubleYAxisSection
                 title="双Y轴"
                 config={doubleYAxis}
                 onChange={this.styleChange('doubleYAxis')}
               />
             )}
-            {xAxis && (
+            {!isDslChart && xAxis && (
               <AxisSection
                 title="X轴"
                 config={xAxis}
                 onChange={this.styleChange('xAxis')}
               />
             )}
-            {yAxis && (
+            {!isDslChart && yAxis && (
               <AxisSection
                 title="Y轴"
                 config={yAxis}
                 onChange={this.styleChange('yAxis')}
               />
             )}
-            {axis && (
+            {!isDslChart && axis && (
               <AxisSection
                 title="轴"
                 config={axis}
                 onChange={this.styleChange('axis')}
               />
             )}
-            {splitLine && (
+            {!isDslChart && splitLine && (
               <SplitLineSection
                 title="分隔线"
                 config={splitLine}
                 onChange={this.styleChange('splitLine')}
               />
             )}
-            {areaSelect && (
+            {!isDslChart && areaSelect && (
               <AreaSelectSection
                 title="坐标轴框选"
                 config={areaSelect}
                 onChange={this.styleChange('areaSelect')}
               />
             )}
-            {scorecard && (
+            {!isDslChart && scorecard && (
               <ScorecardSection
                 title="翻牌器"
                 config={scorecard}
                 onChange={this.styleChange('scorecard')}
               />
             )}
-            {gauge && (
+            {!isDslChart && gauge && (
               <GaugeSection
                 title="仪表盘"
                 config={gauge}
                 onChange={this.styleChange('gauge')}
               />
             )}
-            {iframe && (
+            {!isDslChart && iframe && (
               <IframeSection
                 title="内嵌网页"
                 config={iframe}
                 onChange={this.styleChange('iframe')}
               />
             )}
-            {table && (
+            {!isDslChart && table && (
               <TableSection
                 dataParams={dataParams}
                 config={table}
                 onChange={this.styleChange('table')}
               />
             )}
-            {pivotConfig && (
+            {!isDslChart && pivotConfig && (
               <PivotSection
                 title="透视表"
                 config={pivotConfig}
@@ -2387,21 +2401,27 @@ export class OperatingPanel extends React.Component<
       <div className={styles.operatingPanel}>
         <div className={styles.model}>
           <div className={styles.viewSelect}>
-            <Select
-              size="small"
-              placeholder="选择一个View"
-              showSearch
-              dropdownMatchSelectWidth={false}
-              value={selectedView && selectedView.id}
-              onChange={this.viewSelect}
-              filterOption={filterSelectOption}
-            >
-              {(views || []).map(({ id, name }) => (
-                <Option key={id} value={id}>
-                  {name}
-                </Option>
-              ))}
-            </Select>
+            {this.props.lockViewSelection ? (
+              <span className={styles.lockedViewName}>
+                {selectedView ? selectedView.name : '数据集'}
+              </span>
+            ) : (
+              <Select
+                size="small"
+                placeholder="选择一个View"
+                showSearch
+                dropdownMatchSelectWidth={false}
+                value={selectedView && selectedView.id}
+                onChange={this.viewSelect}
+                filterOption={filterSelectOption}
+              >
+                {(views || []).map(({ id, name }) => (
+                  <Option key={id} value={id}>
+                    {name}
+                  </Option>
+                ))}
+              </Select>
+            )}
             {/* <Dropdown overlay={coustomFieldSelectMenu} trigger={['click']} placement="bottomRight">
               <Icon type="plus" />
             </Dropdown> */}

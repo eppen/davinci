@@ -22,7 +22,7 @@ import React from 'react'
 import Helmet from 'react-helmet'
 import { connect } from 'react-redux'
 import { createStructuredSelector } from 'reselect'
-import { Route, HashRouter as Router, Switch, Redirect } from 'react-router-dom'
+import { Route, Switch, Redirect, withRouter } from 'react-router-dom'
 import { RouteComponentWithParams } from 'utils/types'
 
 import { compose } from 'redux'
@@ -45,6 +45,7 @@ import FindPassword from 'containers/FindPassword'
 import { Background } from 'containers/Background/Loadable'
 import { Main } from 'containers/Main/Loadable'
 import { Activate } from 'containers/Register/Loadable'
+import { ChartDesigner, ViewDesigner, SourceDesigner } from 'containers/EmbeddedDesigner/Loadable'
 
 type MappedStates = ReturnType<typeof mapStateToProps>
 type MappedDispatches = ReturnType<typeof mapDispatchToProps>
@@ -145,15 +146,16 @@ export class App extends React.PureComponent<AppProps> {
             }
           ]}
         />
-        <Router>
-          <Switch>
-            <Route path="/activate" component={Activate} />
-            <Route path="/joinOrganization" exact component={Background} />
-            <Route path="/findPassword" component={FindPassword} />
-            <Route path="/" exact render={this.renderRoute} />
-            <Route path="/" component={logged ? Main : Background} />
-          </Switch>
-        </Router>
+        <Switch>
+          <Route path="/activate" component={Activate} />
+          <Route path="/joinOrganization" exact component={Background} />
+          <Route path="/findPassword" component={FindPassword} />
+          <Route path="/chart-designer" component={logged ? ChartDesigner : Background} />
+          <Route path="/view-designer" component={logged ? ViewDesigner : Background} />
+          <Route path="/source-designer" component={logged ? SourceDesigner : Background} />
+          <Route path="/" exact render={this.renderRoute} />
+          <Route path="/" component={logged ? Main : Background} />
+        </Switch>
       </div>
     )
   }
@@ -182,5 +184,6 @@ const withConnect = connect(
 export default compose(
   withReducer,
   withSaga,
-  withConnect
+  withConnect,
+  withRouter
 )(App)

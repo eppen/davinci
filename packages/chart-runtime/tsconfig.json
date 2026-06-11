@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "module": "ESNext",
+    "declaration": true,
+    "outDir": "dist",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@mes/chart-core": ["../chart-core/src"],
+      "@mes/chart-core/*": ["../chart-core/src/*"]
+    }
+  },
+  "include": ["src/**/*", "../chart-core/src/**/*"]
+}

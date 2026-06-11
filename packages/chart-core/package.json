@@ -1,0 +1,8 @@
+{
+  "name": "@mes/chart-core",
+  "version": "1.0.0",
+  "description": "Chart DSL template engine and ECharts renderer for MES × Davinci",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "license": "Apache-2.0"
+}

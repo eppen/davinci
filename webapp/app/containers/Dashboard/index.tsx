@@ -57,6 +57,7 @@ import { makeSelectCurrentDashboard } from './selectors'
 import { makeSelectWidgets } from 'containers/Widget/selectors'
 import {
   hideNavigator,
+  showNavigator,
   checkNameUniqueAction,
   loadDownloadList,
   downloadFile
@@ -105,6 +106,7 @@ interface IDashboardProps extends RouteComponentWithParams {
   onEditDashboard: (type: string, dashboard: IDashboard[], resolve: any) => void
   onDeleteDashboard: (id: number, portalId: number, resolve: any) => void
   onHideNavigator: () => void
+  onShowNavigator: () => void
   onCheckUniqueName: (pathname: string, data: any, resolve: () => any, reject: (error: string) => any) => any
   onLoadPortals: (projectId) => void
   onLoadProjectDetail: (id) => any
@@ -206,6 +208,9 @@ export class Dashboard extends React.Component<IDashboardProps, IDashboardStates
 
   public componentDidMount () {
     this.props.onHideNavigator()
+    window.setTimeout(() => {
+      window.dispatchEvent(new Event('resize'))
+    }, 0)
   }
 
   private initPortal = (projectId, portalId) => {
@@ -652,7 +657,8 @@ export class Dashboard extends React.Component<IDashboardProps, IDashboardStates
   }
 
   private cancel = () => {
-    const { history, match } = this.props
+    const { history, match, onShowNavigator } = this.props
+    onShowNavigator()
     history.replace(`/project/${match.params.projectId}/vizs`)
   }
 
@@ -930,6 +936,7 @@ export function mapDispatchToProps (dispatch) {
     onEditDashboard: (formType, dashboard, resolve) => dispatch(VizActions.editDashboard(formType, dashboard, resolve)),
     onDeleteDashboard: (id, portalId, resolve) => dispatch(VizActions.deleteDashboard(id, portalId, resolve)),
     onHideNavigator: () => dispatch(hideNavigator()),
+    onShowNavigator: () => dispatch(showNavigator()),
     onCheckUniqueName: (pathname, data, resolve, reject) => dispatch(checkNameUniqueAction(pathname, data, resolve, reject)),
     onLoadPortals: (projectId) => dispatch(VizActions.loadPortals(projectId)),
     onLoadProjectDetail: (id) => dispatch(loadProjectDetail(id)),

@@ -360,7 +360,7 @@ export const VizActions = {
 
   editCurrentDashboard (
     dashboard: IDashboard,
-    type: 'linkage' | 'control',
+    type: 'linkage' | 'control' | 'layout',
     resolve: () => void) {
     return {
       type: ActionTypes.EDIT_CURRENT_DASHBOARD,
@@ -371,7 +371,7 @@ export const VizActions = {
       }
     }
   },
-  currentDashboardEdited (result: IDashboard, type: 'linkage' | 'control') {
+  currentDashboardEdited (result: IDashboard, type: 'linkage' | 'control' | 'layout') {
     return {
       type: ActionTypes.EDIT_CURRENT_DASHBOARD_SUCCESS,
       payload: {

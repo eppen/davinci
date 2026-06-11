@@ -107,11 +107,20 @@ export interface IChartStyles {
   bar?: IBarConfig
   radar?: IRadarConfig
   doubleYAxis?: IDoubleYAxisConfig
+  dsl?: Record<string, string | number | boolean>
 }
 
 export interface IChartRule {
   dimension: number | [number, number]
   metric: number | [number, number]
+}
+
+export interface IChartStyleField {
+  key: string
+  title: string
+  component: 'number' | 'input' | 'select' | 'color' | 'switch'
+  default?: string | number | boolean
+  options?: Array<{ label: string; value: string | number }>
 }
 
 export interface IChartInfo {
@@ -124,6 +133,10 @@ export interface IChartInfo {
   dimetionAxis?: DimetionType
   data: object
   style: object
+  code?: string
+  optionTemplate?: object | string
+  styleSchema?: IChartStyleField[]
+  isDsl?: boolean
 }
 
 export interface IPaginationParams {

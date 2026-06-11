@@ -1,0 +1,22 @@
+{
+  "code": "mes-equip-status",
+  "name": "mes-equip-status",
+  "title": "设备状态矩阵",
+  "category": "mes",
+  "renderer": "echarts",
+  "dataSchema": {
+    "id": 905,
+    "coordinate": "cartesian",
+    "rules": [{ "dimension": [1, 1], "metric": [1, 1] }]
+  },
+  "styleSchema": [
+    { "key": "okColor", "title": "正常色", "component": "color", "default": "#52c41a" },
+    { "key": "warnColor", "title": "警告色", "component": "color", "default": "#faad14" },
+    { "key": "errorColor", "title": "故障色", "component": "color", "default": "#f5222d" }
+  ],
+  "optionTemplate": {
+    "xAxis": { "type": "category", "data": "{{colValues}}" },
+    "yAxis": { "type": "category", "data": "{{metricValues}}" },
+    "series": [{ "type": "scatter", "symbolSize": 40, "data": [[0, 0, 1], [1, 0, 2], [2, 0, 0]] }]
+  }
+}

@@ -18,6 +18,7 @@ DASHBOARD_CONFIG = {
     "filters": [],
     "linkages": [],
     "queryMode": 0,
+    "layoutTemplate": "full-stack",
 }
 
 # 12 列栅格：上下各一块整行图表

@@ -18,4 +18,7 @@ export interface IServerConfigurations {
       enable: boolean
     }
   }
+  authSso?: {
+    mode: 'eos-ticket' | 'mes-jwt' | 'both'
+  }
 }

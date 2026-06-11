@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -30,13 +31,22 @@ public class ChartTypeController extends BaseController {
     @Autowired
     private ChartTypeService chartTypeService;
 
+    private ResultMap successOrRefreshToken(HttpServletRequest request) {
+        ResultMap resultMap = new ResultMap(tokenUtils);
+        String token = request.getHeader(Constants.TOKEN_HEADER_STRING);
+        if (StringUtils.isEmpty(token)) {
+            return resultMap.success();
+        }
+        return resultMap.successAndRefreshToken(request);
+    }
+
     @AuthIgnore
     @ApiOperation(value = "list chart types")
     @GetMapping
     public ResponseEntity list(@RequestParam(value = "enabled", required = false) Boolean enabled,
                                @ApiIgnore HttpServletRequest request) {
         try {
-            ResultMap resultMap = new ResultMap(tokenUtils).successAndRefreshToken(request)
+            ResultMap resultMap = successOrRefreshToken(request)
                     .payloads(chartTypeService.list(enabled));
             return ResponseEntity.status(resultMap.getCode()).body(resultMap);
         } catch (Exception e) {
@@ -51,7 +61,7 @@ public class ChartTypeController extends BaseController {
     public ResponseEntity getByCode(@PathVariable String code,
                                     @ApiIgnore HttpServletRequest request) {
         try {
-            ResultMap resultMap = new ResultMap(tokenUtils).successAndRefreshToken(request)
+            ResultMap resultMap = successOrRefreshToken(request)
                     .payload(chartTypeService.getByCode(code));
             return ResponseEntity.status(resultMap.getCode()).body(resultMap);
         } catch (ServerException e) {
