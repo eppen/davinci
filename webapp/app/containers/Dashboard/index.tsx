@@ -206,6 +206,9 @@ export class Dashboard extends React.Component<IDashboardProps, IDashboardStates
 
   public componentDidMount () {
     this.props.onHideNavigator()
+    window.setTimeout(() => {
+      window.dispatchEvent(new Event('resize'))
+    }, 0)
   }
 
   private initPortal = (projectId, portalId) => {
